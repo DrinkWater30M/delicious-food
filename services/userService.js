@@ -1,7 +1,6 @@
 const sequelize = require('../models');
 const { QueryTypes } = require('sequelize');
 const generateID = require('../utils/generateID');
-const { log } = require('handlebars');
 
 async function getInfoByUserName(username){
     try{
@@ -77,34 +76,46 @@ async function addAccount(username, hashPassword){
     }
 }
 
-async function showCart(id){
+async function getShoppingCartByID(KhachHangID){
     try{
-        const sql = `select m.MonID, m.TenMon, m.Gia, ct.SoLuong from ChiTietGioHang ct, MON m where ct.KhachHangID = '${id}' and ct.MonID = m.MonID`
+        const sql = `select M.TenMon, CTGH.SoLuong, M.Gia, CTGH.MonID
+                    from ChiTietGioHang CTGH, Mon M
+                    where CTGH.KhachHangID = '${KhachHangID}' and CTGH.MonID = M.MonID`;
         
-        return await sequelize.query(sql);
+        const userInfo = await sequelize.query(sql,  { type: QueryTypes.SELECT });
+
+        //return userInfo.length === 0 ? null : userInfo[0];
+        return userInfo;
     }
     catch(error){
         console.log(error);
     }
 }
 
-async function themDonHang(nguoinhan, sdt, diachi, phisanpham, id){
+async function deleteShoppingCartByID(MonID, KhachHangID){
     try{
-        const sql = `insert into DonHang(NguoiNhan, SoDienThoai, DiaChiNhanHang, NgayDatHang, PhiSanPham, PhiVanChuyen, TrangThai, KhachHangID)
-        values ('${nguoinhan}', '${sdt}', '${diachi}', CAST(GETDATE() AS DATE), ${phisanpham}, 15000, 'Chờ nhận', '${id}')`
+        const sql = `delete from  ChiTietGioHang
+                    where KhachHangID = '${KhachHangID}' and MonID = '${MonID}'`;
         
-        return await sequelize.query(sql);
+         await sequelize.query(sql,  { type: QueryTypes.DELETE });
+
     }
     catch(error){
         console.log(error);
     }
 }
 
-async function themChiTietDonHang(idmon, soluong, gia){
+async function getPurchaseByID(KhachHangID){
     try{
-        const sql = `exec ThemChiTietDonHang '${idmon}', ${soluong}, ${gia}`;
+        const sql = `select DH.NguoiNhan, DH.SoDienThoai, DH. NgayDatHang, DH.TrangThai, DH.DiaChiNhanHang, M.TenMon, M.LinkHinhAnh
+                    from DonHang DH, Mon M, ChiTietDonHang CTDH
+                    where DH.KhachHangID = '${KhachHangID}' and DH.DonHangID = CTDH.DonHangID and CTDH.MonID = M.MonID
+                    order by NgayDatHang DESC`;
         
-        return await sequelize.query(sql);
+        const userInfo = await sequelize.query(sql,  { type: QueryTypes.SELECT });
+
+        //return userInfo.length === 0 ? null : userInfo[0];
+        return userInfo;
     }
     catch(error){
         console.log(error);
@@ -117,7 +128,7 @@ module.exports = {
     getAccount,
     addAccount,
     updateProfile,
-    showCart,
-    themDonHang,
-    themChiTietDonHang
+    getShoppingCartByID,
+    deleteShoppingCartByID,
+    getPurchaseByID,
 }
