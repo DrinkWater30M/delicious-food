@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/gioHang.css" />
+    <!-- cdn bootstrap -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- HEADER -->
+    <header class="header">
+      <a href="/" class="logo">
+        <i class="fas fa-shopping-basket"></i> groco
+      </a>
+      <nav class="navbar">
+        <a href="#home">home</a>
+        <a href="/user/purchase">all bill</a>
+        <a href="../page/danhSachSanPham.html">products</a>
+        <a href="./page/danhSachDoiTac.html">food shop</a>
+        <a href="#review">review</a>
+        <a href="#blogs">blogs</a>
+      </nav>
+
+      <div class="icons">
+        <a href="/user/shoppingcart">
+          <div class="fas fa-shopping-cart" id="cart-btn"></div>
+        </a>
+        <a href="/user/profile">
+          <div class="fas fa-user" id="login-btn"></div>
+        </a>
+      </div>
+    </header>
+    <!-- HEADER -->
+    <!-- Body -->
+    <div class="cart">
+      <h1 style="text-align: center; margin-bottom: 30px; font-size: 30px">
+        Gio hang
+      </h1>
+
+     <table class="content-table" style="margin: 0 10%; width: 80%;">
+        <thead>
+          <tr>
+            <th>STD</th>
+            <th>Name</th>
+            <th>Quality</th>
+            <th>Price</th>
+            <th>Setting</th>
+          </tr>
+        </thead>
+        <tbody>
+          <script>
+              var stt = 1;
+          </script>
+          {{#each userInfo}}
+          <tr>
+            <td>
+              <script>
+                document.write(stt);
+                stt += 1;
+              </script>
+            </td>
+            <td>{{this.TenMon}}</td>
+            <td>
+            <input type="text" style="width: 30px;" value={{this.SoLuong}}>
+            </td>
+            <td>{{this.Gia}} </td>
+             <td>
+              <a href="/user/shoppingcart/delete/{{this.MonID}}" class="btn-xoa">Delete</a>
+             </td>
+          </tr>
+         {{/each}}
+        </tbody>
+      </table>
+
+      <div class="thanhToan">
+        <p class="title" style="color: rgb(255, 85, 0);">kiem tra don hang truoc khi thanh toans</p>
+        <a class="btn-thanhtoan" href="../page/thanhToan.html">thanh toan</a>
+      </div>
+
+    <!-- Body -->
+    <!-- FOOTER -->
+    <section class="footer">
+      <div class="box-container">
+        <div class="box">
+          <h3>groco <i class="fas fa-shopping-basket"></i></h3>
+          <p>
+            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquam,
+            saepe.
+          </p>
+          <div class="share">
+            <a href="#" class="fab fa-facebook-f"></a>
+            <a href="#" class="fab fa-twitter"></a>
+            <a href="#" class="fab fa-instagram"></a>
+            <a href="#" class="fab fa-linkedin"></a>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>contact info</h3>
+          <a href="#" class="links">
+            <i class="fas fa-phone"></i> +123-456-7890
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-phone"></i> +111-222-3333
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-envelope"></i> shaikhanas@gmail.com
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-map-marker-alt"></i> mumbai, india - 400104
+          </a>
+        </div>
+
+        <div class="box">
+          <h3>quick links</h3>
+          <a href="#" class="links">
+            <i class="fas fa-arrow-right"></i> home
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-arrow-right"></i> features
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-arrow-right"></i> products
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-arrow-right"></i> categories
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-arrow-right"></i> review
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-arrow-right"></i> blogs
+          </a>
+        </div>
+
+        <div class="box">
+          <h3>newsletter</h3>
+          <p>subscribe for latest updates</p>
+          <input type="email" placeholder="your email" class="email" />
+          <input type="submit" value="subscribe" class="btn" />
+          <img src="./assets/img/banner-bg.webp" class="payment-img" alt="" />
+        </div>
+      </div>
+
+      <div class="credit">
+        created by <span> mr. web designer </span> | all rights reserved
+      </div>
+    </section>
+  </body>
+</html>
