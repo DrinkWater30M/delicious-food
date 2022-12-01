@@ -1,5 +1,6 @@
 const userService = require('../services/userService');
 const bcrypt = require('bcrypt');
+const { restart } = require('nodemon');
 const saltRounds = 10;
 
 async function getProfilePage(req, res){
@@ -104,54 +105,53 @@ async function register(req, res){
     catch(error){
         console.log(error);
     }
-
 }
 
-async function showThanhtoan(req, res) {
-    try {
-        const id = req.user.KhachHangID;
-        const giohang = await userService.showCart(id)
-        let sum = giohang[0]
-        let phisanpham = 0;
-        sum.forEach(function (item, index) {
-            phisanpham += item.Gia * item.SoLuong;
-        });
-        res.render('userView/payment', {giohang: giohang[0], phisanpham: phisanpham});
+async function getShoppingCart(req, res){
+    try{
+        //get id from request
+        const KhachHangID = req.user.KhachHangID;
+        const userInfo = await userService.getShoppingCartByID(KhachHangID);
+
+        // const info = userInfo[0];
+        //
+        res.render('userView/shoppingcart.hbs', { userInfo});
+    
     }
-    catch(err){
-        console.log(err);
+    catch(error){
+        console.log(error);
     }
 }
 
-async function xulithanhtoan(req, res){
-    try {
-        const id = req.user.KhachHangID;
-        let giohang = await userService.showCart(id)
-        const nguoinhan = req.body.name;
-        const sdt = req.body.sdt;
-        const diachi = req.body.diachi;
-        let phisanpham = 0;
-        giohang = giohang[0];
-        // Tính phí sản phẩm
-        giohang.forEach(function (item, index) {
-            phisanpham += item.Gia * item.SoLuong;
-        });
-        // Thêm đơn hàng
-        const add = await userService.themDonHang(nguoinhan, sdt, diachi, phisanpham, id)
-        var bool = add[1];
-
-        // Gọi hàm thêm chi tiết đơn hàng
-        giohang.forEach(function (item, index) {
-            userService.themChiTietDonHang(item.MonID, item.SoLuong, item.Gia);
-        });
-        if (!add) res.render('userView/payment', {giohang: giohang[0], phisanpham: phisanpham, status: "Thanh toán đơn hàng không thành công!"});
-        else
-        res.redirect('/');
+async function deleteAtShoppingCart(req, res, next){
+    try{
+        const MonID = req.params.id;
+        const KhachHangID = req.user.KhachHangID;
+        userService.deleteShoppingCartByID(MonID, KhachHangID);
+        res.redirect('back');
     }
-    catch(err){
-        console.log(err);
+    catch(error){
+        console.log(error);
     }
 }
+
+async function getPurchase(req, res){
+    try{
+        //get id from request
+        const KhachHangID = req.user.KhachHangID;
+        const userInfo = await userService.getPurchaseByID(KhachHangID);
+
+        // const info = userInfo[0];
+        //
+        res.render('userView/purchase.hbs', { userInfo});
+    
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
+
 module.exports = {
     getLoginPage,
     login,
@@ -160,6 +160,7 @@ module.exports = {
     getProfilePage,
     getUpdateProfilePage,
     updateProfile,
-    showThanhtoan,
-    xulithanhtoan,
+    getShoppingCart,
+    deleteAtShoppingCart,
+    getPurchase,
 }
