@@ -9,6 +9,10 @@ router.use('/', homeRouter);
 const userRouter = require('./userRouter');
 router.use('/user', userRouter);
 
+////user path
+const driverRouter = require('./driverRouter');
+router.use('/driver', driverRouter);
+
 //product path
 const productRouter = require('./productRouter');
 router.use('/product', productRouter);

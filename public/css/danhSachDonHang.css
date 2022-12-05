@@ -33,6 +33,7 @@
 .partner .content .item {
   display: flex;
   justify-content: space-between;
+  gap: 100px;
   margin-bottom: 12px;
   background-color: white;
   padding: 10px;
@@ -43,12 +44,28 @@
   display: flex;
 }
 
+.partner .content .item .left .foods{
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+
+.partner .content .item .left .foods .food{
+  display: flex;
+  gap: 24px;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+
 .partner .content .item img {
   width: 100px;
   height: 100px;
 }
 
-.partner .content .item .left .title h3 {
+.partner .content .item .left .foods h3 {
   font-size: 30px;
   margin-left: 20px;
 }

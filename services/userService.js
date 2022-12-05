@@ -141,25 +141,62 @@ async function deleteShoppingCartByID(MonID, KhachHangID){
 
 async function getPurchaseByID(KhachHangID, search){
     try{
+        let purchase = [];
         if (search === undefined){
-            sql = `select DH.NguoiNhan, DH.SoDienThoai as SDT, DH. NgayDatHang, DH.TrangThai, DH.DiaChiNhanHang, M.TenMon, M.LinkHinhAnh,
-            M.MonID, DH.DonHangID, TX.HoTen, TX.BienSoXe, TX.SoDienThoai
+            const sql = `select DH.NguoiNhan, DH.SoDienThoai as SDT, DH. NgayDatHang, DH.TrangThai, DH.DiaChiNhanHang,
+            CTDH.SoLuong, CTDH.GiaBan, 
+            M.TenMon, M.LinkHinhAnh,
+            M.MonID, DH.DonHangID, TX.TaiXeID, TX.HoTen, TX.BienSoXe, TX.SoDienThoai
             from DonHang DH left join TaiXe TX on DH.TaiXeID = TX.TaiXeID, Mon M, ChiTietDonHang CTDH
             where DH.KhachHangID = '${KhachHangID}' and DH.DonHangID = CTDH.DonHangID and CTDH.MonID = M.MonID
-            order by NgayDatHang desc`;
+            order by DonHangID desc`;
         
             purchase = await sequelize.query(sql,  { type: QueryTypes.SELECT });
         }
         else{
-             sql = `select DH.NguoiNhan, DH.SoDienThoai as SDT, DH. NgayDatHang, DH.TrangThai, DH.DiaChiNhanHang, M.TenMon, M.LinkHinhAnh,
+             const sql = `select DH.NguoiNhan, DH.SoDienThoai as SDT, DH. NgayDatHang, DH.TrangThai, DH.DiaChiNhanHang, 
+             CTDH.SoLuong, CTDH.GiaBan,
+             M.TenMon, M.LinkHinhAnh,
              M.MonID, DH.DonHangID, TX.HoTen, TX.BienSoXe, TX.SoDienThoai
              from DonHang DH left join TaiXe TX on DH.TaiXeID = TX.TaiXeID, Mon M, ChiTietDonHang CTDH
              where DH.KhachHangID = '${KhachHangID}' and DH.DonHangID = CTDH.DonHangID and CTDH.MonID = M.MonID and M.TenMon like N'%${search}%'
-             order by NgayDatHang DESC`;
+             order by DonHangID DESC`;
             purchase = await sequelize.query(sql,  { type: QueryTypes.SELECT });
         }
         
-        return purchase.length === 0 ? null : purchase;
+        if (purchase.length === 0){ return null;}
+
+        let result = [];
+        purchase.forEach(function(item) {
+            var existing = result.filter(function(v, i) {
+              return v.DonHangID == item.DonHangID;
+            });
+            if (existing.length) {
+                let Mon = {
+                    TenMon: item.TenMon, 
+                    LinkHinhAnh: item.LinkHinhAnh, 
+                    SoLuong: item.SoLuong,
+                    GiaBan: item.GiaBan,
+                }
+
+                const existingIndex = result.indexOf(existing[0]);
+                result[existingIndex].DanhSachMon.push(Mon);
+            } else {
+                item.DanhSachMon = [{
+                    TenMon: item.TenMon, 
+                    LinkHinhAnh: item.LinkHinhAnh, 
+                    SoLuong: item.SoLuong,
+                    GiaBan: item.GiaBan,
+                }]
+                delete item.TenMon;
+                delete item.LinkHinhAnh;
+                delete item.SoLuong;
+                delete item.GiaBan;
+                result.push(item);
+            }
+        });
+        
+        return result;
     }
     catch(error){
         console.log(error);
