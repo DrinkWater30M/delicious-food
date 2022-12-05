@@ -1,6 +1,7 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local');
 const userService = require('../services/userService');
+const driverService = require('../services/driverService');
 const bcrypt = require('bcrypt');
 
 passport.use(
@@ -25,7 +26,12 @@ passport.use(
                 }
 
                 //veryfi successfully
-                const userInfo = await userService.getInfoByUserName(username);
+                let userInfo = await userService.getInfoByUserName(username);
+
+                if(!userInfo){
+                    userInfo = await driverService.getInfoByUserName(username);
+                }
+
                 return cb(null, userInfo);
 
             }
@@ -39,7 +45,7 @@ passport.use(
 
 passport.serializeUser(function(userInfo, cb) {
     process.nextTick(function() {
-      cb(null, { KhachHangID: userInfo.KhachHangID, Username: userInfo.Username });
+      cb(null, { KhachHangID: userInfo.KhachHangID || userInfo.TaiXeID, Username: userInfo.Username });
     });
 });
   

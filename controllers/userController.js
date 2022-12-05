@@ -143,6 +143,7 @@ async function xulithanhtoan(req, res){
         // Gọi hàm thêm chi tiết đơn hàng
         giohang.forEach(function (item, index) {
             userService.themChiTietDonHang(item.MonID, item.SoLuong, item.Gia);
+            userService.deleteShoppingCartByID(item.MonID, id);
         });
         if (!add) res.render('userView/payment', {giohang: giohang[0], phisanpham: phisanpham, status: "Thanh toán đơn hàng không thành công!"});
         else
@@ -185,8 +186,7 @@ async function getPurchase(req, res){
         const KhachHangID = req.user.KhachHangID;
         const search =  req.query.search;
         const purchase = await userService.getPurchaseByID(KhachHangID, search);
-
-        // const info = userInfo[0];
+        
         //
         res.render('userView/purchase.hbs', { purchase});
     

@@ -15,7 +15,17 @@ function assignUser(req, res, next){
     next();
 }
 
+function verifyDriverLogin(req, res, next){
+    if(!req.user){
+        res.redirect('/driver/login');
+        return;
+    }
+
+    return next(); 
+}
+
 module.exports = {
     verifyLogin,
-    assignUser
+    assignUser,
+    verifyDriverLogin,
 }
