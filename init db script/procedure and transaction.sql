@@ -373,3 +373,122 @@ as
 			return
 		end catch
 go
+
+--20120289 - Võ Minh Hiếu
+--UNREPEATETABLE READ
+--T1: T1: Khách hàng xem đánh giá món ăn thuộc một đơn hàng
+--T2: Đối tác xóa món ăn
+--T1:
+CREATE
+--ALTER
+PROC usr_XemDanhGiaMonAn
+	@KhachHangID char(50),
+	@DonHangID int,
+	@MonID char(50)
+AS
+	BEGIN TRAN
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM DonHang WHERE KhachHangID = @KhachHangID AND DonHangID = @DonHangID)
+				BEGIN
+					PRINT N'Không tồn tại đơn hàng'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			IF NOT EXISTS (SELECT * FROM ChiTietDonHang WHERE DonHangID = @DonHangID AND MonID = @MonID)
+				BEGIN
+					PRINT N'Không tồn tại chi tiết đơn hàng với mã món ăn = ' + CAST(@MonID AS NVARCHAR)
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			WAITFOR DELAY '00:00:10'
+
+			SELECT M.TenMon, CTDH.DanhGia
+			FROM ChiTietDonHang CTDH, Mon M
+			WHERE CTDH.DonHangID = @DonHangID AND CTDH.MonID = @MonID AND CTDH.MonID = M.MonID
+		END TRY
+
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--T2: 
+CREATE
+--ALTER
+PROC doitac_XoaMonAn
+	@monid char(50)
+AS
+	BEGIN TRAN
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM Mon WHERE MonID = @monid)
+				BEGIN
+					PRINT N'Không tồn tại món ăn'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+
+			IF EXISTS (SELECT * FROM ChiTietGioHang WHERE MonID = @monid)
+				BEGIN
+					DELETE FROM ChiTietDonHang
+					WHERE MonID = @monid
+				END
+
+			--xóa ở Chi tiết đơn hàng
+			DELETE FROM ChiTietDonHang
+			WHERE MonID = @monid
+			
+			DELETE FROM Mon
+			WHERE MonID = @monid
+		END TRY
+		
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--Fix lỗi
+CREATE
+--ALTER
+PROC usr_XemDanhGiaMonAn_FIX
+	@KhachHangID char(50),
+	@DonHangID int,
+	@MonID char(50)
+AS
+	BEGIN TRAN
+		SET TRANSACTION ISOLATION LEVEL REPEATABLE READ
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM DonHang WHERE KhachHangID = @KhachHangID AND DonHangID = @DonHangID)
+				BEGIN
+					PRINT N'Không tồn tại đơn hàng'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			IF NOT EXISTS (SELECT * FROM ChiTietDonHang WHERE DonHangID = @DonHangID AND MonID = @MonID)
+				BEGIN
+					PRINT N'Không tồn tại chi tiết đơn hàng với mã món ăn = ' + CAST(@MonID AS NVARCHAR)
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			WAITFOR DELAY '00:00:10'
+
+			SELECT M.TenMon, CTDH.DanhGia
+			FROM ChiTietDonHang CTDH, Mon M
+			WHERE CTDH.DonHangID = @DonHangID AND CTDH.MonID = @MonID AND CTDH.MonID = M.MonID
+		END TRY
+
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
