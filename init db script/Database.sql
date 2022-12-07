@@ -1,4 +1,4 @@
-﻿-- Script tạo DB cho hệ thống giao thức ăn
+﻿-- Script tạo và nhập lệu DB cho hệ thống giao thức ăn
 use master
 go
 
