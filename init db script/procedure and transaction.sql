@@ -419,24 +419,21 @@ BEGIN TRANSACTION
 		commit
 go
 -- Tài xế xem danh sách đơn hàng trong khu vực hoạt động
-create PROC pTaiXeXemDanhSachDonHang
-	@DonHangID char(10), @taixeId char(50) 
+CREATE PROC pTaiXeXemDanhSachDonHang
+	 @taixeId char(50) 
 AS
 set transaction isolation level read uncommitted
 BEGIN TRANSACTION
 	begin try
 	--Kiem tra ton tai id
-		IF NOT EXISTS (SELECT * FROM DonHang WHERE DonHangID = @DonHangID)
+		IF NOT EXISTS (SELECT * FROM TaiXe WHERE TaiXeID = @taixeId)
 			BEGIN
-				PRINT 'id ' + @DonHangID + N'không tồn tại'
+				PRINT 'id ' + @taixeId + N'không tồn tại'
 				ROLLBACK TRANSACTION
 				RETURN 
 			END
-		ELSE
-			declare @vitri ntext
-			set @vitri = (select KhuVucHoatDong from TaiXe where TaiXeID = @taixeId)
-			-- Hiển thị các đơn hàng ở khu vực mà tài xế hoạt động 
-			select * from DonHang where DonHangID = @DonHangID and DiaChiNhanHang like '%' + @vitri + '%'
+		ELSE 
+			select * from DonHang where cast(DiaChiNhanHang as nvarchar) like '%' + cast((select KhuVucHoatDong from TaiXe where TaiXeID = @taixeId)as nvarchar) + '%'
 		end try
 		begin catch
 			print N'Đã xảy ra lỗi!'
@@ -448,23 +445,21 @@ go
 
 -- Đã fix:
 -- Tài xế xem danh sách đơn hàng trong khu vực hoạt động
-create PROC pTaiXeXemDanhSachDonHang_Fix
-	@DonHangID char(10), @taixeId char(50) 
+CREATE PROC pTaiXeXemDanhSachDonHang_Fix
+	 @taixeId char(50) 
 AS
 BEGIN TRANSACTION
 	begin try
 	--Kiem tra ton tai id
-		IF NOT EXISTS (SELECT * FROM DonHang WHERE DonHangID = @DonHangID)
+		IF NOT EXISTS (SELECT * FROM TaiXe WHERE TaiXeID = @taixeId)
 			BEGIN
-				PRINT 'id ' + @DonHangID + N'không tồn tại'
+				PRINT 'id ' + @taixeId + N'không tồn tại'
 				ROLLBACK TRANSACTION
 				RETURN 
 			END
 		ELSE
-			declare @vitri ntext
-			set @vitri = (select KhuVucHoatDong from TaiXe where TaiXeID = @taixeId)
-			-- Hiển thị các đơn hàng ở khu vực mà tài xế hoạt động 
-			select * from DonHang where DonHangID = @DonHangID and DiaChiNhanHang like '%' + @vitri + '%'
+			 
+			select * from DonHang where cast(DiaChiNhanHang as nvarchar) like '%' + cast((select KhuVucHoatDong from TaiXe where TaiXeID = @taixeId)as nvarchar) + '%'
 		end try
 		begin catch
 			print N'Đã xảy ra lỗi!'
