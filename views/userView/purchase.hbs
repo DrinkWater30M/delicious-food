@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link rel="stylesheet" href="/css/thongTinCaNhan.css" />
+    <link rel="stylesheet" href="/css/danhSachDonHang.css" />
     <!-- cdn bootstrap -->
     <link
       rel="stylesheet"
@@ -46,65 +46,63 @@
     </header>
     <!-- HEADER -->
     <!-- Body -->
-    <div class="inf">
-      <h1
-        style="
-          text-align: center;
-          margin-bottom: 30px;
-          font-size: 30px;
-          color: #130f40;
-        "
-      >
-        Thông tin cá nhân
-      </h1>
-      <div class="container">
-        {{#with userInfo}}
-        <div class="grid-left">
-          <img src="/img/download.jpeg" alt="" />
-          <div class="name">
-            <h3>
-              {{#if this.HoTen}}
-                {{this.HoTen}}
-              {{else}}
-                Chưa Cập Nhật
-              {{/if}}
-            </h3>
-          </div>
-        </div>
 
-        <div class="grid-right">
-          <div class="contact">
-            <div class="title">
-              <h3>Lien he</h3>
-              <a href="/user/updateProfile">Chỉnh sửa</a>
+    <div class="partner" style="margin: 150px">
+      <div class="content-top">
+        <h1 style="margin-left: 40px">danh sach don hang</h1>
+        <div class="search">
+          <form action="/user/purchase" method="get">
+            <div class="from">
+              <p style="margin-bottom: 5px;">tim kiem</p>
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" name="search"/>
+              <button type="submit">Search</button>
             </div>
-            <div class="content">
-              <p>SDT: <span style="padding-left: 33px">
-                {{#if this.SoDienThoai}}
-                  {{this.SoDienThoai}}
-                {{else}}
-                  Chưa Cập Nhật
-                {{/if}}
-              </span> </p>
-              <p>Dia chi: <span style="margin-left: 10px;">
-                {{#if this.DiaChi}}
-                  {{this.DiaChi}}
-                {{else}}
-                  Chưa Cập Nhật
-                {{/if}}
-              </span></p>
-              <p>Email: <span style="margin-left: 25px;">
-                {{#if this.Email}}
-                  {{this.Email}}
-                {{else}}
-                  Chưa Cập Nhật
-                {{/if}}
-              </span></p>
+          </form>
+        </div>
+      </div>
+      <div class="content">
+        {{#each purchase}}
+        <a href="/product/detail/{{this.MonID}}" class="product"></a>
+        <div class="item">
+          <div class="left">
+            <div class="foods">
+              {{#each this.DanhSachMon}}
+              <div class="food">
+                <img src={{this.LinkHinhAnh}} alt="purchase" />
+                <div class="detail">
+                  <h3>{{this.TenMon}}</h3>
+                  <p>Số lượng: {{this.SoLuong}}</p>
+                  <p>Giá bán: {{this.GiaBan}}</p>
+                </div>
+              </div>
+              {{/each}}
+            </div>
+            <div class="title">
+              <p>Mã đơn hàng: <span class="billID">{{this.DonHangID}}</span></p>
+              <p>Người nhận: {{this.NguoiNhan}}</p>
+              <p>Số điện thoại: {{this.SDT}}</p>
+              <p>Địa chỉ nhận hàng: {{this.DiaChiNhanHang}}</p>
+              <p>Tên tài xế: {{#if this.HoTen}}{{this.HoTen}}{{else}}Chưa Nhận Đơn{{/if}} </p>
+              <p>Biển số xe: {{#if this.BienSoXe}}{{this.BienSoXe}}{{else}}Chưa Nhận Đơn{{/if}} </p>
+              <p>Số điện thoại: {{#if this.SoDienThoai}}{{this.SoDienThoai}}{{else}}Chưa Nhận Đơn{{/if}} </p>
             </div>
           </div>
+          <div class="right-active">
+            <p class="billStatus">{{this.TrangThai}}</p>
+            {{#if this.TaiXeID}}
+            {{else}}
+              <button class="removeBill">Hủy Đơn Hàng</button>
+            {{/if}}
+          </div>
         </div>
-        {{/with}}
+        {{/each}}
+        <form id="removeBill" action="/user/purchase"  method="post">
+          <input type="hidden" name="billID">
+        </form>
       </div>
+      <!--  -->
+
     </div>
     <!-- Body -->
     <!-- FOOTER -->
@@ -170,4 +168,42 @@
       </div>
     </section>
   </body>
+  <script>
+    //get page from url
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+      get: (searchParams, prop) => searchParams.get(prop),
+    });
+    // Get the value of "some_key" in eg "https://example.com/?some_key=some_value"
+    const search = params.search;
+    document.querySelector('input[name="search"]').value = params.search;
+    
+    //remove bill
+    const billList = document.querySelectorAll('.item');
+    billList.forEach((item, index)=>{
+      const removeBillButton = item.querySelector('.removeBill');
+      const billStatus = item.querySelector('.billStatus');
+      
+      removeBillButton.addEventListener('click', ()=>{
+        //bill in failure status
+        if(billStatus.textContent.toLowerCase() != 'chờ nhận'){
+          alert('Đơn hàng chỉ được hủy khi "Chờ Nhận", không thể hủy.');
+          return;  
+        }
+
+        //cancel remove bill
+        if(!confirm('Bạn muốn hủy đơn hàng này?')){
+          return;
+        }
+
+        //remove bill
+        const removeBillForm = document.getElementById('removeBill');
+        const billIDInput = document.querySelector('input[name="billID"]');
+        const billID = item.querySelector('.billID');
+        //
+        billIDInput.value = billID.textContent;
+        removeBillForm.submit();
+      })
+    })
+    
+  </script>
 </html>

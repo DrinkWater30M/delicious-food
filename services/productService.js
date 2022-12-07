@@ -32,7 +32,8 @@ async function getProductDetail(id) {
 // Thêm vào giỏ hàng
 async function addtoCart(KhachHangID, MonID, soluong) {
     try {
-        const sql = `exec CapNhatGioHang '${KhachHangID}','${MonID}', ${soluong}`;
+        const GioHangID = generateID('GH');
+        const sql = `exec CapNhatGioHang '${GioHangID}', '${KhachHangID}','${MonID}', ${soluong}`;
         return await sequelize.query(sql);
     }
     catch(error){

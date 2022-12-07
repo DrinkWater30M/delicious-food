@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/danhSachDonHang.css" />
+    <!-- cdn bootstrap -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- HEADER -->
+    <header class="header">
+      <a href="/driver/home" class="logo">
+        <i class="fas fa-shopping-basket"></i> groco
+      </a>
+      <nav class="navbar">
+        <a href="/driver/home">home</a>
+        <a href="/driver/pending">pending</a>
+        <a href="/driver/inTransit">in transit</a>
+        <a href="/driver/delivered">delivered</a>
+        <a href="#">some thing</a>
+        <a href="#">some thing</a>
+      </nav>
+
+      <div class="icons">
+        <a href="#">
+          <div class="fas fa-shopping-cart" id="cart-btn"></div>
+        </a>
+        <a href="/driver/login">
+          <div class="fas fa-user" id="login-btn"></div>
+        </a>
+        {{#if user}}
+          <a href="#" onclick="document.getElementById('logout-form').submit()">
+            <div class="fas fa-sign-out-alt" title="Logout"></div>
+          </a>
+          <span style="color: black; font-size: 1.2rem; text-transform: none">{{user.Username}}</span>
+          <form id="logout-form" action="/driver/logout" method="post"></form>
+          </form>
+        {{/if}}
+      </div>
+    </header>
+    <!-- HEADER -->
+    <!-- Body -->
+
+    <div class="partner" style="margin: 150px">
+      <div class="content-top">
+        <h1 style="margin-left: 40px">danh sach don hang</h1>
+        <div class="search">
+          <form action="/user/purchase" method="get">
+            <div class="from">
+              <p style="margin-bottom: 5px;">tim kiem</p>
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" name="search"/>
+              <button type="submit">Search</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="content">
+        {{#each billList}}
+        <a href="/product/detail/{{this.MonID}}" class="product"></a>
+        <div class="item">
+          <div class="left">
+            <div class="foods">
+              {{#each this.DanhSachMon}}
+              <div class="food">
+                <img src={{this.LinkHinhAnh}} alt="purchase" />
+                <div class="detail">
+                  <h3>{{this.TenMon}}</h3>
+                  <p>Số lượng: {{this.SoLuong}}</p>
+                  <p>Giá bán: {{this.GiaBan}}</p>
+                </div>
+              </div>
+              {{/each}}
+            </div>
+            <div class="title">
+              <p>Mã đơn hàng: <span class="billID">{{this.DonHangID}}</span></p>
+              <p>Người nhận: {{this.NguoiNhan}}</p>
+              <p>Số điện thoại: {{this.SoDienThoai}}</p>
+              <p>Địa chỉ nhận hàng: {{this.DiaChiNhanHang}}</p>
+              <p>Tên tài xế: {{#if this.HoTen}}{{this.HoTen}}{{else}}Chưa Nhận Đơn{{/if}} </p>
+              <p>Biển số xe: {{#if this.BienSoXe}}{{this.BienSoXe}}{{else}}Chưa Nhận Đơn{{/if}} </p>
+              <p>Số điện thoại: {{#if this.SDT}}{{this.SDT}}{{else}}Chưa Nhận Đơn{{/if}} </p>
+            </div>
+          </div>
+          <div class="right-active">
+            <p class="billStatus">{{this.TrangThai}}</p>
+            {{#if this.TaiXeID}}
+            {{else}}
+              <button class="receiveBill">Nhận Đơn Hàng</button>
+            {{/if}}
+          </div>
+        </div>
+        {{/each}}
+        <form id="receiveBill" action="/driver/receiveBill"  method="post">
+          <input type="hidden" name="billID">
+        </form>
+      </div>
+      <!--  -->
+
+    </div>
+    <!-- Body -->
+    <!-- FOOTER -->
+    <section class="footer">
+      <div class="box-container">
+        <div class="box">
+          <h3>groco <i class="fas fa-shopping-basket"></i></h3>
+          <p>
+            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquam,
+            saepe.
+          </p>
+          <div class="share">
+            <a href="#" class="fab fa-facebook-f"></a>
+            <a href="#" class="fab fa-twitter"></a>
+            <a href="#" class="fab fa-instagram"></a>
+            <a href="#" class="fab fa-linkedin"></a>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>contact info</h3>
+          <a href="#" class="links">
+            <i class="fas fa-phone"></i> +123-456-7890
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-phone"></i> +111-222-3333
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-envelope"></i> shaikhanas@gmail.com
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-map-marker-alt"></i> mumbai, india - 400104
+          </a>
+        </div>
+
+        <div class="box">
+          <h3>quick links</h3>
+          <a href="/" class="links">
+            <i class="fas fa-arrow-right"></i> home
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-arrow-right"></i> some thing
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-arrow-right"></i> some thing
+          </a>
+          <a href="#" class="links">
+            <i class="fas fa-arrow-right"></i> some thing
+          </a>
+        </div>
+
+        <div class="box">
+          <h3>newsletter</h3>
+          <p>subscribe for latest updates</p>
+          <input type="email" placeholder="your email" class="email" />
+          <input type="submit" value="subscribe" class="btn" />
+          <img src="/img/banner-bg.webp" class="payment-img" alt="" />
+        </div>
+      </div>
+
+      <div class="credit">
+        created by <span> mr. web designer </span> | all rights reserved
+      </div>
+    </section>
+  </body>
+  <script>
+    //get page from url
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+      get: (searchParams, prop) => searchParams.get(prop),
+    });
+    // Get the value of "some_key" in eg "https://example.com/?some_key=some_value"
+    const search = params.search;
+    document.querySelector('input[name="search"]').value = params.search;
+    
+    //receive bill
+    const billList = document.querySelectorAll('.item');
+    billList.forEach((item, index)=>{
+      const receiveBillButton = item.querySelector('.receiveBill');
+      const billStatus = item.querySelector('.billStatus');
+      
+      receiveBillButton.addEventListener('click', ()=>{
+        //bill in failure status
+        if(billStatus.textContent.toLowerCase() != 'chờ nhận'){
+          alert('Đơn hàng chỉ được nhận khi "Chờ Nhận", không thể nhận.');
+          return;  
+        }
+
+        //cancel remceive bill
+        if(!confirm('Bạn muốn nhận đơn hàng này?')){
+          return;
+        }
+
+        //remove bill
+        const receiveBillForm = document.getElementById('receiveBill');
+        const billIDInput = document.querySelector('input[name="billID"]');
+        const billID = item.querySelector('.billID');
+        
+        //
+        billIDInput.value = billID.textContent;
+        receiveBillForm.submit();
+      })
+    })
+    
+  </script>
+</html>

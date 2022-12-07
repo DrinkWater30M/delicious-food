@@ -1,0 +1,132 @@
+@import "../css/header.css";
+@import "../css/footer.css";
+@import "../css/reset.css";
+
+.partner {
+}
+
+.partner h1 {
+  font-size: 25px;
+}
+
+.partner .content-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.partner .content-top .search .from button{
+  background-color: #e19452;
+  padding: 15px;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+}
+
+.partner .content-top .search .from input {
+ padding: 15px;
+ width: 250px;
+ border-radius: 20px;
+}
+
+.partner .content .item {
+  display: flex;
+  justify-content: space-between;
+  gap: 100px;
+  margin-bottom: 12px;
+  background-color: white;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.partner .content .item .left {
+  display: flex;
+}
+
+.partner .content .item .left .foods{
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+
+.partner .content .item .left .foods .food{
+  display: flex;
+  gap: 24px;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+
+.partner .content .item img {
+  width: 100px;
+  height: 100px;
+}
+
+.partner .content .item .left .foods h3 {
+  font-size: 30px;
+  margin-left: 20px;
+}
+.partner .content .item .left .title .icon{
+    margin-left: 30px; 
+    margin-top: 10px;
+}
+
+.partner .content .item .left p {
+  font-size: 15px;
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.partner .content .item .right-active {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.partner .content .item .right-active p{
+  background-color: green;
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.partner .content .item .right-active button{
+  background-color: red;
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.partner .content .item .right-not-active p {
+  background-color: red;
+  color: white;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.content-bottom {
+  text-align: center;
+  font-size: 17px;
+}
+
+.content-bottom .pagination li {
+display: inline;
+}
+
+.content-bottom .pagination li a{
+  display: inline-block;
+  text-decoration: none;
+  padding: 5px 10px;
+  color: white;
+  background-color: #dfb997;
+  border-radius: 5px;
+}
+
+.content-bottom .pagination li .active{
+  background: #F9880E;
+  color: white;
+}

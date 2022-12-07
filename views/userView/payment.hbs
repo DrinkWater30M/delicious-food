@@ -15,27 +15,33 @@
   <body>
     <!-- HEADER -->
     <header class="header">
-      <a href="#" class="logo">
+      <a href="/" class="logo">
         <i class="fas fa-shopping-basket"></i> groco
       </a>
       <nav class="navbar">
         <a href="/">home</a>
-        <a href="#features">features</a>
-                <a href="/product/list?foodShop=&search=&page=1">products</a>
-
-                <a href="/foodShop/list?search=&page=1"> food shop</a>
-
+        <a href="/product/list?foodShop=&search=&page=1">products</a>
+        <a href="/foodShop/list?search=&page=1">Food Shop</a>
+        <a href="/user/purchase">all bill</a>
         <a href="#review">review</a>
         <a href="#blogs">blogs</a>
       </nav>
 
       <div class="icons">
-        <a href="../page/gioHang.html">
+        <a href="/user/shoppingcart">
           <div class="fas fa-shopping-cart" id="cart-btn"></div>
         </a>
         <a href="/user/profile">
           <div class="fas fa-user" id="login-btn"></div>
         </a>
+        {{#if user}}
+          <a href="#" onclick="document.getElementById('logout-form').submit()">
+            <div class="fas fa-sign-out-alt" title="Logout"></div>
+          </a>
+          <span style="color: black; font-size: 1.2rem; text-transform: none">{{user.Username}}</span>
+          <form id="logout-form" action="/user/logout" method="post"></form>
+          </form>
+        {{/if}}
       </div>
     </header>
     <!-- HEADER -->
@@ -49,6 +55,7 @@
         <thead>
           <tr>
             <th>STT</th>
+            <th>Image</th>
             <th>Name</th>
             <th>Quatity</th>
             <th>Price</th>
@@ -86,7 +93,10 @@
           {{#each giohang}}
             <tr>
                   
-              <td>{{@index}}</td>
+              <td><script>document.write({{@index}} + 1)</script></td>
+              <td>
+                <img src={{this.LinkHinhAnh}} alt="food image" style="width: 100px; height: 100px; border-radius: 5px;">
+              </td>
               <td>{{this.TenMon}}</td>
               <td>{{this.SoLuong}}</td>
               <td>{{this.Gia}}</td>
@@ -135,7 +145,7 @@
 
       <div class="total">
         <div>
-          <p style="color: red;">Kiem tra thong tin giao hang truoc khi dat hang</p>
+          <p style="color: red;">Kiểm tra thông tin trước khi đặt hàng</p>
         </div>
           <p style="padding: 0 10px; margin-left: 100px;">Phí sản phẩm: {{phisanpham}}</p>
           <p style="padding: 0 10px; margin-left: 100px;">Phí vận chuyển: 15000</p>
@@ -178,23 +188,17 @@
 
         <div class="box">
           <h3>quick links</h3>
-          <a href="#" class="links">
+          <a href="/" class="links">
             <i class="fas fa-arrow-right"></i> home
           </a>
-          <a href="#" class="links">
-            <i class="fas fa-arrow-right"></i> features
-          </a>
-          <a href="#" class="links">
+          <a href="/product/list?foodShop=&search=&page=1" class="links">
             <i class="fas fa-arrow-right"></i> products
           </a>
-          <a href="#" class="links">
-            <i class="fas fa-arrow-right"></i> categories
+          <a href="/foodShop/list?search=&page=1" class="links">
+            <i class="fas fa-arrow-right"></i> Food Shop
           </a>
-          <a href="#" class="links">
-            <i class="fas fa-arrow-right"></i> review
-          </a>
-          <a href="#" class="links">
-            <i class="fas fa-arrow-right"></i> blogs
+          <a href="/user/purchase" class="links">
+            <i class="fas fa-arrow-right"></i> All Bill
           </a>
         </div>
 
@@ -212,4 +216,18 @@
       </div>
     </section>
   </body>
+  <script defer>
+    window.onload = ()=>{
+      //get page from url
+      const params = new Proxy(new URLSearchParams(window.location.search), {
+        get: (searchParams, prop) => searchParams.get(prop),
+      });
+
+      //handle to success checkout
+      if(params.checkout){
+        alert("Thanh toán thành công, đến xem đơn hàng nào!");
+        window.location.href = "/user/purchase";
+      }
+    }
+  </script>
 </html>

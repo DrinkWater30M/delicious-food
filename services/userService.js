@@ -79,7 +79,7 @@ async function addAccount(username, hashPassword){
 
 async function showCart(id){
     try{
-        const sql = `select m.MonID, m.TenMon, m.Gia, ct.SoLuong from ChiTietGioHang ct, MON m where ct.KhachHangID = '${id}' and ct.MonID = m.MonID`
+        const sql = `select m.*, ct.SoLuong from ChiTietGioHang ct, MON m where ct.KhachHangID = '${id}' and ct.MonID = m.MonID`
         
         return await sequelize.query(sql);
     }
@@ -91,7 +91,7 @@ async function showCart(id){
 async function themDonHang(nguoinhan, sdt, diachi, phisanpham, id){
     try{
         const sql = `insert into DonHang(NguoiNhan, SoDienThoai, DiaChiNhanHang, NgayDatHang, PhiSanPham, PhiVanChuyen, TrangThai, KhachHangID)
-        values ('${nguoinhan}', '${sdt}', '${diachi}', CAST(GETDATE() AS DATE), ${phisanpham}, 15000, 'Chờ nhận', '${id}')`
+        values ('${nguoinhan}', '${sdt}', '${diachi}', CAST(GETDATE() AS DATE), ${phisanpham}, 15000, N'Chờ nhận', '${id}')`
         
         return await sequelize.query(sql);
     }
@@ -111,6 +111,111 @@ async function themChiTietDonHang(idmon, soluong, gia){
     }
 }
 
+async function getShoppingCartByID(KhachHangID){
+    try{
+        const sql = `select M.*, CTGH.SoLuong, M.Gia, CTGH.MonID
+                    from ChiTietGioHang CTGH, Mon M
+                    where CTGH.KhachHangID = '${KhachHangID}' and CTGH.MonID = M.MonID`;
+        
+        const cart = await sequelize.query(sql,  { type: QueryTypes.SELECT });
+
+        return cart.length === 0 ? null : cart;
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
+async function deleteShoppingCartByID(MonID, KhachHangID){
+    try{
+        const sql = `delete from  ChiTietGioHang
+                    where KhachHangID = '${KhachHangID}' and MonID = '${MonID}'`;
+        
+         await sequelize.query(sql,  { type: QueryTypes.DELETE });
+
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
+async function getPurchaseByID(KhachHangID, search){
+    try{
+        let purchase = [];
+        if (search === undefined){
+            const sql = `select DH.NguoiNhan, DH.SoDienThoai as SDT, DH. NgayDatHang, DH.TrangThai, DH.DiaChiNhanHang,
+            CTDH.SoLuong, CTDH.GiaBan, 
+            M.TenMon, M.LinkHinhAnh,
+            M.MonID, DH.DonHangID, TX.TaiXeID, TX.HoTen, TX.BienSoXe, TX.SoDienThoai
+            from DonHang DH left join TaiXe TX on DH.TaiXeID = TX.TaiXeID, Mon M, ChiTietDonHang CTDH
+            where DH.KhachHangID = '${KhachHangID}' and DH.DonHangID = CTDH.DonHangID and CTDH.MonID = M.MonID
+            order by DonHangID desc`;
+        
+            purchase = await sequelize.query(sql,  { type: QueryTypes.SELECT });
+        }
+        else{
+             const sql = `select DH.NguoiNhan, DH.SoDienThoai as SDT, DH. NgayDatHang, DH.TrangThai, DH.DiaChiNhanHang, 
+             CTDH.SoLuong, CTDH.GiaBan,
+             M.TenMon, M.LinkHinhAnh,
+             M.MonID, DH.DonHangID, TX.HoTen, TX.BienSoXe, TX.SoDienThoai
+             from DonHang DH left join TaiXe TX on DH.TaiXeID = TX.TaiXeID, Mon M, ChiTietDonHang CTDH
+             where DH.KhachHangID = '${KhachHangID}' and DH.DonHangID = CTDH.DonHangID and CTDH.MonID = M.MonID and M.TenMon like N'%${search}%'
+             order by DonHangID DESC`;
+            purchase = await sequelize.query(sql,  { type: QueryTypes.SELECT });
+        }
+        
+        if (purchase.length === 0){ return null;}
+
+        let result = [];
+        purchase.forEach(function(item) {
+            var existing = result.filter(function(v, i) {
+              return v.DonHangID == item.DonHangID;
+            });
+            if (existing.length) {
+                let Mon = {
+                    TenMon: item.TenMon, 
+                    LinkHinhAnh: item.LinkHinhAnh, 
+                    SoLuong: item.SoLuong,
+                    GiaBan: item.GiaBan,
+                }
+
+                const existingIndex = result.indexOf(existing[0]);
+                result[existingIndex].DanhSachMon.push(Mon);
+            } else {
+                item.DanhSachMon = [{
+                    TenMon: item.TenMon, 
+                    LinkHinhAnh: item.LinkHinhAnh, 
+                    SoLuong: item.SoLuong,
+                    GiaBan: item.GiaBan,
+                }]
+                delete item.TenMon;
+                delete item.LinkHinhAnh;
+                delete item.SoLuong;
+                delete item.GiaBan;
+                result.push(item);
+            }
+        });
+        
+        return result;
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
+async function removeBill(DonHangID){
+    try{
+        const sql = `update DonHang 
+                    set TrangThai = N'Đã Hủy' 
+                    where DonHang.DonHangID = '${DonHangID}' and DonHang.TrangThai = N'Chờ Nhận'`;
+        
+        await sequelize.query(sql, { type: QueryTypes.UPDATE });
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
 module.exports = {
     getInfoByUserName,
     getInfoByID,
@@ -119,5 +224,9 @@ module.exports = {
     updateProfile,
     showCart,
     themDonHang,
-    themChiTietDonHang
+    themChiTietDonHang,
+    getShoppingCartByID,
+    deleteShoppingCartByID,
+    getPurchaseByID,
+    removeBill,
 }

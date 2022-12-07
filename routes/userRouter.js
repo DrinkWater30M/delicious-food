@@ -39,4 +39,16 @@ router.get('/thanhtoan', middleware.verifyLogin, userController.showThanhtoan)
 // Xử lý thanh toán
 router.post('/xulithanhtoan', middleware.verifyLogin, userController.xulithanhtoan)
 
+//Hiển thị giỏ hàng
+router.get('/shoppingcart', middleware.verifyLogin, userController.getShoppingCart);
+
+//Xóa món hàng trong giỏ hàng
+router.get('/shoppingcart/delete/:id',userController.deleteAtShoppingCart);
+
+//Hiển thị danh sách đơn hàng
+router.get('/purchase',middleware.verifyLogin, userController.getPurchase);
+
+// POST remove bill
+router.post('/purchase', userController.removeBill);
+
 module.exports = router;

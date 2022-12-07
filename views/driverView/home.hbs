@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <link rel="stylesheet" href="/css/thongTinCaNhan.css" />
+    <title>Delicious Food</title>
+    <link rel="stylesheet" href="/css/trangChu.css" />
     <!-- cdn bootstrap -->
     <link
       rel="stylesheet"
@@ -15,23 +15,23 @@
   <body>
     <!-- HEADER -->
     <header class="header">
-      <a href="/" class="logo">
+      <a href="/driver/home" class="logo">
         <i class="fas fa-shopping-basket"></i> groco
       </a>
       <nav class="navbar">
-        <a href="/">home</a>
-        <a href="/product/list?foodShop=&search=&page=1">products</a>
-        <a href="/foodShop/list?search=&page=1">Food Shop</a>
-        <a href="/user/purchase">all bill</a>
-        <a href="#review">review</a>
-        <a href="#blogs">blogs</a>
+        <a href="/driver/home">home</a>
+        <a href="/driver/pending">pending</a>
+        <a href="/driver/inTransit">in transit</a>
+        <a href="/driver/delivered">delivered</a>
+        <a href="#">some thing</a>
+        <a href="#">some thing</a>
       </nav>
 
       <div class="icons">
-        <a href="/user/shoppingcart">
+        <a href="#">
           <div class="fas fa-shopping-cart" id="cart-btn"></div>
         </a>
-        <a href="/user/profile">
+        <a href="/driver/login">
           <div class="fas fa-user" id="login-btn"></div>
         </a>
         {{#if user}}
@@ -39,73 +39,22 @@
             <div class="fas fa-sign-out-alt" title="Logout"></div>
           </a>
           <span style="color: black; font-size: 1.2rem; text-transform: none">{{user.Username}}</span>
-          <form id="logout-form" action="/user/logout" method="post"></form>
+          <form id="logout-form" action="/driver/logout" method="post"></form>
           </form>
         {{/if}}
       </div>
     </header>
     <!-- HEADER -->
     <!-- Body -->
-    <div class="inf">
-      <h1
-        style="
-          text-align: center;
-          margin-bottom: 30px;
-          font-size: 30px;
-          color: #130f40;
-        "
-      >
-        Thông tin cá nhân
-      </h1>
-      <div class="container">
-        {{#with userInfo}}
-        <div class="grid-left">
-          <img src="/img/download.jpeg" alt="" />
-          <div class="name">
-            <h3>
-              {{#if this.HoTen}}
-                {{this.HoTen}}
-              {{else}}
-                Chưa Cập Nhật
-              {{/if}}
-            </h3>
-          </div>
-        </div>
+   <section class="home" id="home">
 
-        <div class="grid-right">
-          <div class="contact">
-            <div class="title">
-              <h3>Lien he</h3>
-              <a href="/user/updateProfile">Chỉnh sửa</a>
-            </div>
-            <div class="content">
-              <p>SDT: <span style="padding-left: 33px">
-                {{#if this.SoDienThoai}}
-                  {{this.SoDienThoai}}
-                {{else}}
-                  Chưa Cập Nhật
-                {{/if}}
-              </span> </p>
-              <p>Dia chi: <span style="margin-left: 10px;">
-                {{#if this.DiaChi}}
-                  {{this.DiaChi}}
-                {{else}}
-                  Chưa Cập Nhật
-                {{/if}}
-              </span></p>
-              <p>Email: <span style="margin-left: 25px;">
-                {{#if this.Email}}
-                  {{this.Email}}
-                {{else}}
-                  Chưa Cập Nhật
-                {{/if}}
-              </span></p>
-            </div>
-          </div>
-        </div>
-        {{/with}}
-      </div>
+    <div class="content">
+        <h3>Deliver food<span> Fast </span>For You</h3>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Aliquam libero nostrum veniam facere tempore nisi.</p>
+        <a href="/driver/pending" class="btn">Deliver Orders</a>
     </div>
+
+</section>
     <!-- Body -->
     <!-- FOOTER -->
     <section class="footer">
@@ -145,14 +94,14 @@
           <a href="/" class="links">
             <i class="fas fa-arrow-right"></i> home
           </a>
-          <a href="/product/list?foodShop=&search=&page=1" class="links">
-            <i class="fas fa-arrow-right"></i> products
+          <a href="#" class="links">
+            <i class="fas fa-arrow-right"></i> some thing
           </a>
-          <a href="/foodShop/list?search=&page=1" class="links">
-            <i class="fas fa-arrow-right"></i> Food Shop
+          <a href="#" class="links">
+            <i class="fas fa-arrow-right"></i> some thing
           </a>
-          <a href="/user/purchase" class="links">
-            <i class="fas fa-arrow-right"></i> All Bill
+          <a href="#" class="links">
+            <i class="fas fa-arrow-right"></i> some thing
           </a>
         </div>
 

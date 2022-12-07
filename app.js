@@ -7,6 +7,7 @@ var passport = require('./auth/passportConfig');
 var session = require('express-session');
 var SQLiteStore = require('connect-sqlite3')(session);
 var flash = require('connect-flash');
+const middleware = require('./middleware/verifyLogin');
 
 
 const indexRouter = require('./routes/index');
@@ -38,7 +39,7 @@ app.use(passport.authenticate('session'));
 app.use(flash());
 
 //routing
-app.use('/', indexRouter);
+app.use('/', middleware.assignUser, indexRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

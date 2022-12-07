@@ -143,15 +143,75 @@ async function xulithanhtoan(req, res){
         // Gọi hàm thêm chi tiết đơn hàng
         giohang.forEach(function (item, index) {
             userService.themChiTietDonHang(item.MonID, item.SoLuong, item.Gia);
+            userService.deleteShoppingCartByID(item.MonID, id);
         });
         if (!add) res.render('userView/payment', {giohang: giohang[0], phisanpham: phisanpham, status: "Thanh toán đơn hàng không thành công!"});
         else
-        res.redirect('/');
+        res.redirect('/user/thanhtoan?checkout=true');
     }
     catch(err){
         console.log(err);
     }
 }
+
+async function getShoppingCart(req, res){
+    try{
+        //get id from request
+        const KhachHangID = req.user.KhachHangID;
+        const cart = await userService.getShoppingCartByID(KhachHangID);
+
+        res.render('userView/shoppingcart.hbs', { cart});
+    
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
+async function deleteAtShoppingCart(req, res, next){
+    try{
+        const MonID = req.params.id;
+        const KhachHangID = req.user.KhachHangID;
+        userService.deleteShoppingCartByID(MonID, KhachHangID);
+        res.redirect('back');
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
+async function getPurchase(req, res){
+    try{
+        //get id from request
+        const KhachHangID = req.user.KhachHangID;
+        const search =  req.query.search;
+        const purchase = await userService.getPurchaseByID(KhachHangID, search);
+        
+        //
+        res.render('userView/purchase.hbs', { purchase});
+    
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
+async function removeBill(req, res){
+    try{
+        //
+        const DonHangID = req.body.billID;
+        
+        //
+        await userService.removeBill(DonHangID);
+
+        //
+        res.redirect('/user/purchase');
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
 module.exports = {
     getLoginPage,
     login,
@@ -162,4 +222,8 @@ module.exports = {
     updateProfile,
     showThanhtoan,
     xulithanhtoan,
+    getShoppingCart,
+    deleteAtShoppingCart,
+    getPurchase,
+    removeBill,
 }
