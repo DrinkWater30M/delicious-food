@@ -80,6 +80,17 @@ async function getDeliveredPage(req, res){
     }
 }
 
+async function getLocationBill(req, res) {
+    try {
+        const TaiXeID = req.user.KhachHangID;
+        const locationOrder = await driverService.getBillListLocation(TaiXeID)
+
+        res.render('driverView/billListLocation.hbs', {billList: locationOrder[0]});
+    }
+    catch(err) {
+
+    }
+}
 async function receiveBill(req, res){
     try{
         //get info
@@ -105,4 +116,5 @@ module.exports = {
     getInTransitPage,
     getDeliveredPage,
     receiveBill,
+    getLocationBill,
 }
