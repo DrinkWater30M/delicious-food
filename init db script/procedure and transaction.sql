@@ -377,7 +377,7 @@ go
 -- 19120585-Nguyễn Hải Nhật Minh
 -- Tình huống 1: Dirty Read Trên DonHang(TrangThai)
 -- Khách hàng hủy đơn hàng đơn hàng
-create PROC pCapNhatTrangThaiDonHang
+create PROC pKhachHangHuyDonHang
 	@DonHangID char(10), @TrangThai nvarchar(20)
 AS
 BEGIN TRANSACTION
@@ -416,7 +416,7 @@ BEGIN TRANSACTION
 		commit
 go
 -- Tài xế xem danh sách đơn hàng trong khu vực hoạt động
-create PROC pXemDanhSachDonHang
+create PROC pTaiXeXemDanhSachDonHang
 	@DonHangID char(10), @taixeId char(50) 
 AS
 set transaction isolation level read uncommitted
@@ -445,7 +445,7 @@ go
 
 -- Đã fix:
 -- Tài xế xem danh sách đơn hàng trong khu vực hoạt động
-create PROC pXemDanhSachDonHang_Fix
+create PROC pTaiXeXemDanhSachDonHang_Fix
 	@DonHangID char(10), @taixeId char(50) 
 AS
 BEGIN TRANSACTION
