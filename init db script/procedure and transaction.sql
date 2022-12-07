@@ -547,7 +547,7 @@ BEGIN TRANSACTION
 go
 
 -- Đã fix:
-create PROC pKhachHangKiemTraDonHang
+create PROC pKhachHangKiemTraDonHang_Fix
 	@khachhangID char(50)
 AS
 BEGIN TRANSACTION
