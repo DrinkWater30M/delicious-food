@@ -376,6 +376,8 @@ go
 
 --20120289 - Võ Minh Hiếu
 --UNREPEATETABLE READ
+--Mô tả: Khách hàng muốn xem đánh giá món ăn, trong khi đó đối tác xóa món ăn khách hàng cần xem đánh giá.
+--Thao tác xem của khách hàng không báo lỗi nhưng không hiển thị ra món ăn cần xem
 --T1: T1: Khách hàng xem đánh giá món ăn thuộc một đơn hàng
 --T2: Đối tác xóa món ăn
 --T1:
@@ -431,6 +433,7 @@ AS
 					RETURN 0
 				END
 
+			--xóa ở chi tiết giỏ hàng
 			IF EXISTS (SELECT * FROM ChiTietGioHang WHERE MonID = @monid)
 				BEGIN
 					DELETE FROM ChiTietDonHang
@@ -438,8 +441,11 @@ AS
 				END
 
 			--xóa ở Chi tiết đơn hàng
-			DELETE FROM ChiTietDonHang
-			WHERE MonID = @monid
+			IF EXISTS (SELECT * FROM ChiTietDonHang WHERE MonID = @monid)
+				BEGIN
+					DELETE FROM ChiTietDonHang
+					WHERE MonID = @monid
+				END
 			
 			DELETE FROM Mon
 			WHERE MonID = @monid
@@ -484,6 +490,114 @@ AS
 			WHERE CTDH.DonHangID = @DonHangID AND CTDH.MonID = @MonID AND CTDH.MonID = M.MonID
 		END TRY
 
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--DIRTY READ
+--Mô tả: Đối tác đang thêm món ăn nhưng xảy ra sự cố (giao tác ROLLBACK mô phỏng sự cố xảy ra), khách hàng vào xem những
+--món ăn của đối tác, thấy món ăn đối tác định thêm nhưng không thể thao tác do chưa được ghi xuống hệ thống
+--T1: Đối tác thêm món ăn
+--T2: Khách hàng xem các món ăn của đối tác
+--T1:
+CREATE
+--ALTER
+PROC doitac_ThemMonAn
+	@monid char(50),
+	@tenmon nvarchar(50),
+	@mieuta text,
+	@gia int,
+	@tinhtrang nvarchar(20),
+	@thucdonid char(50),
+	@linkhinhanh text
+AS
+	BEGIN TRAN
+		BEGIN TRY
+			IF NOT EXISTS (SELECT  * FROM ThucDon WHERE ThucDonID = @thucdonid)
+				BEGIN
+					PRINT N'Không tồn tại thực đơn'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			IF EXISTS (SELECT * FROM Mon WHERE MonID = @monid AND ThucDonID = @thucdonid)
+				BEGIN
+					PRINT N'Đã tồn tại món ăn trong thực đơn'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+
+			INSERT INTO Mon
+			VALUES(@monid, @tenmon, @mieuta, @gia, @tinhtrang, @thucdonid, @linkhinhanh)
+			WAITFOR DELAY '00:00:10'
+
+			--Giả sử hệ thống xảy ra lỗi, phải rollback
+			ROLLBACK TRAN
+			RETURN 0
+			
+		END TRY
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--T2:
+CREATE
+--ALTER
+PROC usr_XemDSMonAn
+	@chinhanhid char(50)
+AS
+	BEGIN TRAN
+	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM ChiNhanh WHERE ChiNhanhID = @chinhanhid)
+				BEGIN
+					PRINT N'Không tồn tại chi nhánh'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			SELECT M.*, CN.TenChiNhanh
+			FROM Mon M JOIN ChiNhanh CN ON CN.ThucDonID = M.ThucDonID
+			WHERE CN.ChiNhanhID = @chinhanhid
+
+		END TRY
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--FIX
+CREATE
+--ALTER
+PROC usr_XemDSMonAn_FIX
+	@chinhanhid char(50)
+AS
+	BEGIN TRAN
+	SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM ChiNhanh WHERE ChiNhanhID = @chinhanhid)
+				BEGIN
+					PRINT N'Không tồn tại chi nhánh'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			SELECT M.*, CN.TenChiNhanh
+			FROM Mon M JOIN ChiNhanh CN ON CN.ThucDonID = M.ThucDonID
+			WHERE CN.ChiNhanhID = @chinhanhid
+
+		END TRY
 		BEGIN CATCH
 			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
 			ROLLBACK TRAN
