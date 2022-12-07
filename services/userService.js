@@ -205,9 +205,12 @@ async function getPurchaseByID(KhachHangID, search){
 
 async function removeBill(DonHangID){
     try{
-        const sql = `update DonHang 
+        /* const sql = `update DonHang 
                     set TrangThai = N'Đã Hủy' 
-                    where DonHang.DonHangID = '${DonHangID}' and DonHang.TrangThai = N'Chờ Nhận'`;
+                    where DonHang.DonHangID = '${DonHangID}' and DonHang.TrangThai = N'Chờ Nhận'`; */
+
+            const sql = `exec pKhachHangHuyDonHang '${DonHangID}', N'Đã hủy'`;
+        
         
         await sequelize.query(sql, { type: QueryTypes.UPDATE });
     }

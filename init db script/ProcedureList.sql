@@ -374,3 +374,196 @@ as
 			return
 		end catch
 go
+
+-- 19120585-Nguyễn Hải Nhật Minh
+-- Tình huống 1: Dirty Read Trên DonHang(TrangThai)
+-- Chưa fix:
+-- Khách hàng hủy đơn hàng 
+create PROC pKhachHangHuyDonHang
+	@DonHangID char(10), @TrangThai nvarchar(20)
+AS
+BEGIN TRANSACTION
+	begin try
+	--Kiem tra ton tai id
+		IF NOT EXISTS (SELECT * FROM DonHang WHERE DonHangID = @DonHangID)
+			BEGIN
+				PRINT 'id ' + @DonHangID + N'không tồn tại'
+				ROLLBACK TRANSACTION
+				RETURN 
+			END
+		ELSE
+			begin 
+				
+				if exists (select * from DonHang where DonHangID = @DonHangID and TrangThai != @TrangThai)
+					begin
+						update DonHang
+						set TrangThai = @TrangThai
+						where DonHangID = @DonHangID and TrangThai != @TrangThai
+					end
+			end
+			WAITFOR DELAY '00:00:15'
+			-- Nếu phí vận chuyển nhỏ hơn 20000, khách hàng không thể hủy đơn hàng có phí vận chuyển < 20000
+			if exists (select * from DonHang dh where dh.PhiVanChuyen < 20000 and DonHangID = @DonHangID)
+				begin
+					print 'Cap nhat khong thanh cong'	
+					rollback transaction
+					return
+				end
+		end try
+		
+		begin catch
+			print N'Đã xảy ra lỗi!'	
+			rollback transaction
+			return 
+		end catch
+		
+		commit
+go
+-- Tài xế xem danh sách đơn hàng trong khu vực hoạt động
+CREATE PROC pTaiXeXemDanhSachDonHang
+	 @taixeId char(50) 
+AS
+set transaction isolation level read uncommitted
+BEGIN TRANSACTION
+	begin try
+	--Kiem tra ton tai id
+		IF NOT EXISTS (SELECT * FROM TaiXe WHERE TaiXeID = @taixeId)
+			BEGIN
+				PRINT 'id ' + @taixeId + N'không tồn tại'
+				ROLLBACK TRANSACTION
+				RETURN 
+			END
+		ELSE 
+			select * from DonHang where cast(DiaChiNhanHang as nvarchar) like '%' + cast((select KhuVucHoatDong from TaiXe where TaiXeID = @taixeId)as nvarchar) + '%'
+		end try
+		begin catch
+			print N'Đã xảy ra lỗi!'
+			rollback transaction
+			return 
+		end catch
+		commit
+go
+
+-- Đã fix:
+-- Tài xế xem danh sách đơn hàng trong khu vực hoạt động
+CREATE PROC pTaiXeXemDanhSachDonHang_Fix
+	 @taixeId char(50) 
+AS
+BEGIN TRANSACTION
+	begin try
+	--Kiem tra ton tai id
+		IF NOT EXISTS (SELECT * FROM TaiXe WHERE TaiXeID = @taixeId)
+			BEGIN
+				PRINT 'id ' + @taixeId + N'không tồn tại'
+				ROLLBACK TRANSACTION
+				RETURN 
+			END
+		ELSE
+			 
+			select * from DonHang where cast(DiaChiNhanHang as nvarchar) like '%' + cast((select KhuVucHoatDong from TaiXe where TaiXeID = @taixeId)as nvarchar) + '%'
+		end try
+		begin catch
+			print N'Đã xảy ra lỗi!'
+			rollback transaction
+			return 
+		end catch
+		commit
+go
+--- Tình huống 2: Dirty read trên DonHang(TrangThai)
+-- Chưa fix:
+-- Tài xế nhận đơn hàng
+create PROC pTaiXeNhanDonHang
+	@DonHangID char(10), @taixeId char(50), @TrangThai nvarchar(20)
+AS
+BEGIN TRANSACTION
+	begin try
+	--Kiem tra ton tai id
+		IF NOT EXISTS (SELECT * FROM DonHang WHERE DonHangID = @DonHangID)
+			BEGIN
+				PRINT 'id ' + @DonHangID + N'không tồn tại'
+				ROLLBACK TRANSACTION
+				RETURN 
+			END
+		ELSE
+			begin 
+				
+				if exists (select * from DonHang where DonHangID = @DonHangID and TrangThai != @TrangThai)
+					begin
+						update DonHang
+						set TrangThai = @TrangThai
+						where DonHangID = @DonHangID and TrangThai != @TrangThai
+					end
+			end
+			WAITFOR DELAY '00:00:15'
+			-- Tài xế không được nhận quá 3 đơn trong cùng 1 ngày
+			declare @count int
+			set @count = (select count(*) from DonHang where TaiXeID = @taixeId
+					group by NgayDatHang)
+			if (@count > 3)
+				begin
+					print 'Cap nhat khong thanh cong'	
+					rollback transaction
+					return
+				end
+		end try
+		
+		begin catch
+			print N'Đã xảy ra lỗi!'	
+			rollback transaction
+			return 
+		end catch
+		
+		commit
+go
+-- Khách hàng kiểm tra đơn hàng của mình
+create PROC pKhachHangKiemTraDonHang
+	@khachhangID char(50)
+AS
+set transaction isolation level read uncommitted
+BEGIN TRANSACTION
+	begin try
+	--Kiem tra ton tai id
+		IF NOT EXISTS (SELECT * FROM DonHang WHERE KhachHangID = @khachhangID)
+			BEGIN
+				PRINT 'id ' + @khachhangID + N'không tồn tại'
+				ROLLBACK TRANSACTION
+				RETURN 
+			END
+		ELSE
+			
+			-- Hiển thị các đơn hàng của khách hàng 
+			select * from DonHang where KhachHangID = @khachhangID
+		end try
+		begin catch
+			print N'Đã xảy ra lỗi!'
+			rollback transaction
+			return 
+		end catch
+		commit
+go
+
+-- Đã fix:
+create PROC pKhachHangKiemTraDonHang_Fix
+	@khachhangID char(50)
+AS
+BEGIN TRANSACTION
+	begin try
+	--Kiem tra ton tai id
+		IF NOT EXISTS (SELECT * FROM DonHang WHERE KhachHangID = @khachhangID)
+			BEGIN
+				PRINT 'id ' + @khachhangID + N'không tồn tại'
+				ROLLBACK TRANSACTION
+				RETURN 
+			END
+		ELSE
+			
+			-- Hiển thị các đơn hàng của khách hàng 
+			select * from DonHang where KhachHangID = @khachhangID
+		end try
+		begin catch
+			print N'Đã xảy ra lỗi!'
+			rollback transaction
+			return 
+		end catch
+		commit
+go

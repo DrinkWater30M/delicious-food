@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Delicious Food</title>
-    <link rel="stylesheet" href="/css/trangChu.css" />
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/danhSachDonHang.css" />
     <!-- cdn bootstrap -->
     <link
       rel="stylesheet"
@@ -23,7 +23,7 @@
         <a href="/driver/pending">pending</a>
         <a href="/driver/inTransit">in transit</a>
         <a href="/driver/delivered">delivered</a>
-        <a href="/driver/getLocationBill">Order in active Location</a>
+        <a href="#">Order in active Location</a>
         <a href="#">some thing</a>
       </nav>
 
@@ -46,15 +46,55 @@
     </header>
     <!-- HEADER -->
     <!-- Body -->
-   <section class="home" id="home">
 
-    <div class="content">
-        <h3>Deliver food<span> Fast </span>For You</h3>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Aliquam libero nostrum veniam facere tempore nisi.</p>
-        <a href="/driver/pending" class="btn">Deliver Orders</a>
+    <div class="partner" style="margin: 150px">
+      <div class="content-top">
+        <h1 style="margin-left: 40px">danh sach don hang</h1>
+        <div class="search">
+          <form action="/user/purchase" method="get">
+            <div class="from">
+              <p style="margin-bottom: 5px;">tim kiem</p>
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" name="search"/>
+              <button type="submit">Search</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="content">
+        <table class="content-table" style="margin: 0 10%; width: 80%; font-size: 14px;">
+          <thead>
+            <tr>
+              <th>Mã đơn hàng</th>
+              <th>Người nhận</th>
+              <th>SDT</th>
+              <th>Địa chỉ nhận</th>
+              <th>Ngày đặt hàng</th>
+              <th>Phí sản phẩm</th>
+              <th>Phí vận chuyển</th>
+              <th>Trạng thái</th>
+            
+            </tr>
+          </thead>
+          <tbody>
+            {{#each billList}}
+              <tr>                
+                <td>{{this.DonHangID}}</td>
+                <td>{{this.NguoiNhan}}</td>
+                  <td>{{this.SoDienThoai}}</td>
+                  <td>{{this.DiaChiNhanHang}}</td>
+                  <td>{{this.NgayDatHang}}</td>
+                  <td>{{this.PhiSanPham}}</td>
+                  <td>{{this.PhiVanChuyen}}</td>
+                  <td>{{this.TrangThai}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+      <!--  -->
+
     </div>
-
-</section>
     <!-- Body -->
     <!-- FOOTER -->
     <section class="footer">
@@ -119,4 +159,43 @@
       </div>
     </section>
   </body>
+  <script>
+    //get page from url
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+      get: (searchParams, prop) => searchParams.get(prop),
+    });
+    // Get the value of "some_key" in eg "https://example.com/?some_key=some_value"
+    const search = params.search;
+    document.querySelector('input[name="search"]').value = params.search;
+    
+    //receive bill
+    const billList = document.querySelectorAll('.item');
+    billList.forEach((item, index)=>{
+      const receiveBillButton = item.querySelector('.receiveBill');
+      const billStatus = item.querySelector('.billStatus');
+      
+      receiveBillButton.addEventListener('click', ()=>{
+        //bill in failure status
+        if(billStatus.textContent.toLowerCase() != 'chờ nhận'){
+          alert('Đơn hàng chỉ được nhận khi "Chờ Nhận", không thể nhận.');
+          return;  
+        }
+
+        //cancel remceive bill
+        if(!confirm('Bạn muốn nhận đơn hàng này?')){
+          return;
+        }
+
+        //remove bill
+        const receiveBillForm = document.getElementById('receiveBill');
+        const billIDInput = document.querySelector('input[name="billID"]');
+        const billID = item.querySelector('.billID');
+        
+        //
+        billIDInput.value = billID.textContent;
+        receiveBillForm.submit();
+      })
+    })
+    
+  </script>
 </html>

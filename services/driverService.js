@@ -96,6 +96,18 @@ async function getBillList(TaiXeID,  status){
     }
 }
 
+async function getBillListLocation(TaiXeID){
+    try {
+        const sql = `exec pTaiXeXemDanhSachDonHang '${TaiXeID}'`
+        const orderList = await sequelize.query(sql); 
+        console.log(orderList);
+        return orderList;
+    }
+    catch(err) {
+        console.log(err);
+    }
+}
+
 async function updateBillDriver(TaiXeID, DonHangID){
     try{
         const sql = `exec ${transactionConfig.pTaiXeNhanDonHang} '${TaiXeID}', ${DonHangID}`;
@@ -112,4 +124,5 @@ module.exports = {
     getAccount,
     getBillList,
     updateBillDriver,
+    getBillListLocation
 }

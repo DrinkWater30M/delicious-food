@@ -34,4 +34,7 @@ router.get('/delivered', middleware.verifyDriverLogin, driverController.getDeliv
 // POST /driver/receiveBill
 router.post('/receiveBill', middleware.verifyDriverLogin, driverController.receiveBill);
 
+// get active Location bill 
+router.get('/getLocationBill', middleware.verifyDriverLogin, driverController.getLocationBill);
+
 module.exports = router;
