@@ -402,9 +402,11 @@ BEGIN TRANSACTION
 			WAITFOR DELAY '00:00:15'
 			-- Nếu phí vận chuyển nhỏ hơn 20000, khách hàng không thể hủy đơn hàng có phí vận chuyển < 20000
 			if exists (select * from DonHang dh where dh.PhiVanChuyen < 20000 and DonHangID = @DonHangID)
-			print 'Cap nhat khong thanh cong'	
-			rollback transaction
-			return
+				begin
+					print 'Cap nhat khong thanh cong'	
+					rollback transaction
+					return
+				end
 		end try
 		
 		begin catch
