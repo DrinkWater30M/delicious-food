@@ -448,7 +448,6 @@ go
 create PROC pXemDanhSachDonHang_Fix
 	@DonHangID char(10), @taixeId char(50) 
 AS
-set transaction isolation level read uncommitted
 BEGIN TRANSACTION
 	begin try
 	--Kiem tra ton tai id
