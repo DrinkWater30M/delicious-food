@@ -56,9 +56,34 @@ async function addtoCart(KhachHangID, MonID, soluong) {
     }
 }
 
+async function deleteProductByID(MonID){
+    try{
+        const sql = `EXEC doitac_XoaMonAn '${MonID}'`;
+        
+        await sequelize.query(sql,  { type: QueryTypes.DELETE });
+        return result;
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
+async function insertProductRB(MonID, TenMon, MieuTa, Gia, TinhTrang, ThucDonID, LinkHinhAnh){
+    try{
+        const sql = `exec doitac_ThemMonAn '${MonID}', '${TenMon}', '${MieuTa}', ${Gia}, '${TinhTrang}', '${ThucDonID}', '${LinkHinhAnh}'`;
+        
+        await sequelize.query(sql);
+
+    }
+    catch(error){
+        console.log(error);
+    }
+}
 
 module.exports = {
     getProductList,
     getProductDetail,
     addtoCart,
+    deleteProductByID,
+    insertProductRB,
 }

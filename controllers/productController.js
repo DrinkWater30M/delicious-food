@@ -52,8 +52,51 @@ async function addtoCart(req, res) {
     }
 }
 
+async function insertProductPage(req, res) {
+    try{
+
+        res.render('productView/productInsert.hbs')
+    }
+    catch (error){
+        console.log(error);
+    }
+}
+
+async function insertProduct(req, res) {
+    try{
+        const MonID = req.body.monid;
+        const TenMon = req.body.tenmon;
+        const MieuTa = req.body.mieuta;
+        const Gia = Number(req.body.gia);
+        const TinhTrang = req.body.tinhtrang;
+        const ThucDonID = req.body.thucdonid;
+        const LinkHinhAnh = req.body.hinhanh;
+    
+        await productService.insertProductRB(MonID, TenMon, MieuTa, Gia, TinhTrang, ThucDonID, LinkHinhAnh);
+        res.redirect('/product/list?foodShop=&search=&page=1');
+    }
+    catch (error){
+        console.log(error);
+    }
+}
+
+async function deleteProduct(req, res){
+    try{
+        const MonID = req.params.id;
+        await productService.deleteProductByID(MonID);
+        
+        res.redirect('/product/list?foodShop=&search=&page=1');
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
 module.exports = {
     getProductListPage,
     getProductDetail,
     addtoCart,
+    insertProductPage,
+    insertProduct,
+    deleteProduct,
 }

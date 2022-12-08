@@ -51,4 +51,7 @@ router.get('/purchase',middleware.verifyLogin, userController.getPurchase);
 // POST remove bill
 router.post('/purchase', userController.removeBill);
 
+//Hiển thị đánh giá
+router.get('/note',userController.getNote)
+
 module.exports = router;

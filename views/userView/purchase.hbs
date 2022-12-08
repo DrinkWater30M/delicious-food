@@ -74,6 +74,18 @@
                   <h3>{{this.TenMon}}</h3>
                   <p>Số lượng: {{this.SoLuong}}</p>
                   <p>Giá bán: {{this.GiaBan}}</p>
+                  <p>
+                    
+                    <a href="/user/note?donhangid={{this.DonHangID}}&monid={{this.MonID}}" class="note">Xem đánh giá</a>
+                    <style>
+                      .note{
+                        font-size: 15px;
+                        border-style: groove;
+                        border-color: beige;
+                      }
+                    </style>
+                  </p>
+                  <p>{{this.DanhGia}}</p>
                 </div>
               </div>
               {{/each}}
@@ -100,7 +112,12 @@
         <form id="removeBill" action="/user/purchase"  method="post">
           <input type="hidden" name="billID">
         </form>
-
+        <p class="dg">{{#if note}}{{note.DanhGia}}{{else}}Chưa có đánh giá{{/if}}</p>
+        <style>
+          .dg{
+            font-size: 15px;
+          }
+        </style>
       </div>
       <!--  -->
 

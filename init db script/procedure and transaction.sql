@@ -418,6 +418,7 @@ AS
 	RETURN 1
 GO
 
+
 --T2: 
 CREATE
 --ALTER
@@ -436,7 +437,7 @@ AS
 			--xóa ở chi tiết giỏ hàng
 			IF EXISTS (SELECT * FROM ChiTietGioHang WHERE MonID = @monid)
 				BEGIN
-					DELETE FROM ChiTietDonHang
+					DELETE FROM ChiTietGioHang
 					WHERE MonID = @monid
 				END
 

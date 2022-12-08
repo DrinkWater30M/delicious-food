@@ -56,6 +56,19 @@
   border-radius: 10px;
 }
 
+.content .productList .product i{
+  font-size: 100px;
+  color: rgb(98, 92, 92);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.content .productList .product h1{
+  color: #000;
+}
+
 .content .productList .product .product-content {
 }
 

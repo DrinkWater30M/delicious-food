@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=Í, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/themMonAn.css" />
+    <!-- css bootstrap -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+    />
+  </head>
+  <div class="cover">
+    <div class="formDangNhap">
+      <h1 style="color: white">Thêm món ăn</h1>
+      <form id="login-form" method="post" action="/product/insert">
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label text-light"
+            >Món ăn ID</label
+          >
+          <input
+            name="monid"
+            type="text"
+            value="mon26"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label text-light"
+            >Tên món</label
+          >
+          <input
+            name="tenmon"
+            type="text"
+            value="Bánh canh"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label text-light"
+            >Miêu tả</label
+          >
+          <input
+            name="mieuta"
+            type="text"
+            value="abc"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label text-light"
+            >Giá bán</label
+          >
+          <input
+            name="gia"
+            type="number"
+            value=20000
+          />
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label text-light"
+            >Tình trạng</label
+          >
+          <input
+            name="tinhtrang"
+            type="text"
+            value="Còn"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label text-light"
+            >Thực đơn</label
+          >
+          <input
+            name="thucdonid"
+            type="text"
+            value="thucdon06"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label text-light"
+            >Hình ảnh</label
+          >
+          <input
+            name="hinhanh"
+            type="text"
+            value="https://statics.vinpearl.com/banh-canh-1_1631867450.jpg"
+          />
+        </div>
+        
+        <button
+          type="submit"
+          class="btn btn-light w-25"
+          style="margin-left: 38%; text-decoration: none; color: black">
+            Thêm món
+        </button>
+      </form>
+    </div>
+  </div>
+  <!-- js bootstrap -->
+  <script>
+    let loginForm = document.getElementById('login-form');
+
+
+
+  </script>
+
+  <!-- js bootstrap -->
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.2/js/bootstrap.min.js"
+    integrity="sha512-5BqtYqlWfJemW5+v+TZUs22uigI8tXeVah5S/1Z6qBLVO7gakAOtkOzUtgq6dsIo5c0NJdmGPs0H9I+2OHUHVQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+  <body></body>
+</html>

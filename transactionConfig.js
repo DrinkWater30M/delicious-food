@@ -1,14 +1,16 @@
 const config = {
     Normal:{
         pTaiXeNhanDonHang: "pTaiXeNhanDonHang",
+        pXemDanhGiaMonAn: "usr_XemDanhGiaMonAn",
         pXemDanhSachMonAn: "usr_XemDSMonAn",
-
     },
 
     Fix:{
         pTaiXeNhanDonHang: "pTaiXeNhanDonHang_Fix",
-        pXemDanhSachMonAn: "usr_XemDSMonAn_FIX"
+        pXemDanhGiaMonAn: "usr_XemDanhGiaMonAn_FIX",
+        pXemDanhSachMonAn: "usr_XemDSMonAn_FIX",
+        
     }
 }
 
-module.exports = config.Fix;
+module.exports = config.Normal;

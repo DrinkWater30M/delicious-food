@@ -12,4 +12,13 @@ router.get('/detail/:id', productController.getProductDetail);
 //
 router.post('/detail/:id', middleware.verifyLogin, productController.addtoCart);
 
+//chỉ dùng để demo tranh chấp dữ liệu
+router.get('/insertPage',productController.insertProductPage);
+
+//chỉ dùng để demo tranh chấp dữ liệu
+router.post('/insert',productController.insertProduct);
+
+//chỉ dùng để demo tranh chấp dữ liệu
+router.get('/delete/:id',productController.deleteProduct)
+
 module.exports = router;

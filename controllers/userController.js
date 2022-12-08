@@ -1,5 +1,6 @@
 const userService = require('../services/userService');
 const bcrypt = require('bcrypt');
+const e = require('connect-flash');
 const saltRounds = 10;
 
 async function getProfilePage(req, res){
@@ -212,6 +213,33 @@ async function removeBill(req, res){
     }
 }
 
+async function getNote(req, res){
+    try{
+        //
+        const KhachHangID = req.user.KhachHangID;
+        const DonHangID = Number(req.query.donhangid);
+        const MonID = req.query.monid;
+        
+        //
+        const purchase = await userService.getPurchaseByID(KhachHangID);
+        const note = await userService.getNoteInfo(KhachHangID, DonHangID, MonID);
+        
+        if(note){
+            res.render('userView/purchase.hbs', {purchase, note: note[0]});
+        }
+        else{
+            let note = "Lỗi: Không tồn tại đơn hàng"
+            res.render('userView/purchase.hbs', {purchase, note});
+        }
+        
+        
+    }
+        
+    catch(error){
+        console.log(error);
+    }
+}
+
 module.exports = {
     getLoginPage,
     login,
@@ -226,4 +254,5 @@ module.exports = {
     deleteAtShoppingCart,
     getPurchase,
     removeBill,
+    getNote,
 }

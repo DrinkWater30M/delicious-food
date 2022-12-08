@@ -2,6 +2,7 @@ const sequelize = require('../models');
 const { QueryTypes } = require('sequelize');
 const generateID = require('../utils/generateID');
 const { log } = require('handlebars');
+const transactionConfig = require('../transactionConfig');
 
 async function getInfoByUserName(username){
     try{
@@ -177,6 +178,8 @@ async function getPurchaseByID(KhachHangID, search){
                     LinkHinhAnh: item.LinkHinhAnh, 
                     SoLuong: item.SoLuong,
                     GiaBan: item.GiaBan,
+                    MonID: item.MonID,
+                    DonHangID: item.DonHangID
                 }
 
                 const existingIndex = result.indexOf(existing[0]);
@@ -187,6 +190,8 @@ async function getPurchaseByID(KhachHangID, search){
                     LinkHinhAnh: item.LinkHinhAnh, 
                     SoLuong: item.SoLuong,
                     GiaBan: item.GiaBan,
+                    MonID: item.MonID,
+                    DonHangID: item.DonHangID
                 }]
                 delete item.TenMon;
                 delete item.LinkHinhAnh;
@@ -216,6 +221,19 @@ async function removeBill(DonHangID){
     }
 }
 
+async function getNoteInfo(KhachHangID, DonHangID, MonID){
+    try{
+        const sql = `exec ${transactionConfig.pXemDanhGiaMonAn}'${KhachHangID}', ${DonHangID}, '${MonID}' `;
+        
+        const note = await sequelize.query(sql, { type: QueryTypes.SELECT });
+
+        return note.length === 0 ? null : note;
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
 module.exports = {
     getInfoByUserName,
     getInfoByID,
@@ -229,4 +247,5 @@ module.exports = {
     deleteShoppingCartByID,
     getPurchaseByID,
     removeBill,
+    getNoteInfo,
 }
