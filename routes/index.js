@@ -21,4 +21,8 @@ router.use('/product', productRouter);
 const foodShopRouter = require('./foodShopRouter');
 router.use('/foodShop', foodShopRouter);
 
+//admin path
+const adminRouter = require('./adminRouter');
+router.use('/admin', adminRouter)
+
 module.exports = router;

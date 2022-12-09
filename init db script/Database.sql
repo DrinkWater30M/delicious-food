@@ -535,7 +535,8 @@ values
 ('abc','0987654321',N'123 nguyễn văn cừ quận 5 hcm','20221022',10000,15000,N'Đang Giao','kh07','tx07'),
 ('abc','0987654321',N'123 nguyễn văn cừ quận 5 hcm','20221022',10000,15000,N'Đang Giao','kh08','tx08'),
 ('abc','0987654321',N'123 nguyễn văn cừ quận 5 hcm','20221022',10000,15000,N'Đang Giao','kh09','tx09'),
-('abc','0987654321',N'123 nguyễn văn cừ quận 5 hcm','20221022',10000,15000,N'Đang Giao','kh10','tx10')
+('abc','0987654321',N'123 nguyễn văn cừ quận 5 hcm','20221022',10000,15000,N'Đang Giao','kh10','tx10'),
+('bac','0123456789',N'123 nguyễn văn cừ quận 5 hcm','20221022',20000,15000,N'Đã Nhận','kh10','tx10'),
 
 insert into ChiTietDonHang
 values('mon01',1 ,3,10000,'abc','5 sao'),
