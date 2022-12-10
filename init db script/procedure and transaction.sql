@@ -378,7 +378,7 @@ go
 -- Tình huống 1: Dirty Read Trên DonHang(TrangThai)
 -- Chưa fix:
 -- Khách hàng hủy đơn hàng 
-create PROC pKhachHangHuyDonHang
+create PROC pKhachHangHuyDonHangDirtyRead
 	@DonHangID char(10), @TrangThai nvarchar(20)
 AS
 BEGIN TRANSACTION
@@ -471,7 +471,7 @@ go
 --- Tình huống 2: Dirty read trên DonHang(TrangThai)
 -- Chưa fix:
 -- Tài xế nhận đơn hàng
-create PROC pTaiXeNhanDonHang
+create PROC pTaiXeNhanDonHangDirtyRead
 	@DonHangID char(10), @taixeId char(50), @TrangThai nvarchar(20)
 AS
 BEGIN TRANSACTION
