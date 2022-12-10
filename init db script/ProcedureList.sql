@@ -567,3 +567,538 @@ BEGIN TRANSACTION
 		end catch
 		commit
 go
+
+--20120289 - Võ Minh Hiếu
+--UNREPEATABLE READ
+--Mô tả: Khách hàng muốn xem đánh giá món ăn, trong khi đó đối tác xóa món ăn khách hàng cần xem đánh giá.
+--Thao tác xem của khách hàng không báo lỗi nhưng không hiển thị ra món ăn cần xem
+--T1: Khách hàng xem đánh giá món ăn thuộc một đơn hàng
+--T2: Đối tác xóa món ăn
+
+--T1:
+CREATE
+--ALTER
+PROC usr_XemDanhGiaMonAn
+	@KhachHangID char(50),
+	@DonHangID int,
+	@MonID char(50)
+AS
+	BEGIN TRAN
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM DonHang WHERE KhachHangID = @KhachHangID AND DonHangID = @DonHangID)
+				BEGIN
+					PRINT N'Không tồn tại đơn hàng'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			IF NOT EXISTS (SELECT * FROM ChiTietDonHang WHERE DonHangID = @DonHangID AND MonID = @MonID)
+				BEGIN
+					PRINT N'Không tồn tại chi tiết đơn hàng với mã món ăn = ' + CAST(@MonID AS NVARCHAR)
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			WAITFOR DELAY '00:00:10'
+
+			SELECT M.TenMon, CTDH.DanhGia
+			FROM ChiTietDonHang CTDH, Mon M
+			WHERE CTDH.DonHangID = @DonHangID AND CTDH.MonID = @MonID AND CTDH.MonID = M.MonID
+		END TRY
+
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--T2:
+CREATE
+--ALTER
+PROC doitac_XoaMonAn
+	@monid char(50)
+AS
+	BEGIN TRAN
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM Mon WHERE MonID = @monid)
+				BEGIN
+					PRINT N'Không tồn tại món ăn'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+
+			--xóa ở chi tiết giỏ hàng
+			IF EXISTS (SELECT * FROM ChiTietGioHang WHERE MonID = @monid)
+				BEGIN
+					DELETE FROM ChiTietGioHang
+					WHERE MonID = @monid
+				END
+
+			--xóa ở Chi tiết đơn hàng
+			IF EXISTS (SELECT * FROM ChiTietDonHang WHERE MonID = @monid)
+				BEGIN
+					DELETE FROM ChiTietDonHang
+					WHERE MonID = @monid
+				END
+			
+			DELETE FROM Mon
+			WHERE MonID = @monid
+		END TRY
+		
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--Fix T1
+CREATE
+--ALTER
+PROC usr_XemDanhGiaMonAn_FIX
+	@KhachHangID char(50),
+	@DonHangID int,
+	@MonID char(50)
+AS
+	BEGIN TRAN
+		SET TRANSACTION ISOLATION LEVEL REPEATABLE READ
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM DonHang WHERE KhachHangID = @KhachHangID AND DonHangID = @DonHangID)
+				BEGIN
+					PRINT N'Không tồn tại đơn hàng'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			IF NOT EXISTS (SELECT * FROM ChiTietDonHang WHERE DonHangID = @DonHangID AND MonID = @MonID)
+				BEGIN
+					PRINT N'Không tồn tại chi tiết đơn hàng với mã món ăn = ' + CAST(@MonID AS NVARCHAR)
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			WAITFOR DELAY '00:00:10'
+
+			SELECT M.TenMon, CTDH.DanhGia
+			FROM ChiTietDonHang CTDH, Mon M
+			WHERE CTDH.DonHangID = @DonHangID AND CTDH.MonID = @MonID AND CTDH.MonID = M.MonID
+		END TRY
+
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--DIRTY READ
+--Mô tả: Đối tác đang thêm món ăn nhưng xảy ra sự cố (giao tác ROLLBACK mô phỏng sự cố xảy ra), khách hàng vào xem những
+--món ăn của đối tác, thấy món ăn đối tác định thêm nhưng không thể thao tác do chưa được ghi xuống hệ thống
+--T1: Đối tác thêm món ăn
+--T2: Khách hàng xem các món ăn của đối tác
+--T1:
+CREATE
+--ALTER
+PROC doitac_ThemMonAn
+	@monid char(50),
+	@tenmon nvarchar(50),
+	@mieuta text,
+	@gia int,
+	@tinhtrang nvarchar(20),
+	@thucdonid char(50),
+	@linkhinhanh text
+AS
+	BEGIN TRAN
+		BEGIN TRY
+			IF NOT EXISTS (SELECT  * FROM ThucDon WHERE ThucDonID = @thucdonid)
+				BEGIN
+					PRINT N'Không tồn tại thực đơn'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			IF EXISTS (SELECT * FROM Mon WHERE MonID = @monid AND ThucDonID = @thucdonid)
+				BEGIN
+					PRINT N'Đã tồn tại món ăn trong thực đơn'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+
+			INSERT INTO Mon
+			VALUES(@monid, @tenmon, @mieuta, @gia, @tinhtrang, @thucdonid, @linkhinhanh)
+			WAITFOR DELAY '00:00:10'
+
+			--Giả sử hệ thống xảy ra lỗi, phải rollback
+			ROLLBACK TRAN
+			RETURN 0
+			
+		END TRY
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--T2:
+CREATE
+--ALTER
+PROC usr_XemDSMonAn
+	@chinhanhid char(50)
+AS
+	BEGIN TRAN
+	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM ChiNhanh WHERE ChiNhanhID = @chinhanhid)
+				BEGIN
+					PRINT N'Không tồn tại chi nhánh'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			SELECT M.*, CN.TenChiNhanh
+			FROM Mon M JOIN ChiNhanh CN ON CN.ThucDonID = M.ThucDonID
+			WHERE CN.ChiNhanhID = @chinhanhid
+
+		END TRY
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--FIX T2
+CREATE
+--ALTER
+PROC usr_XemDSMonAn_FIX
+	@chinhanhid char(50)
+AS
+	BEGIN TRAN
+	SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM ChiNhanh WHERE ChiNhanhID = @chinhanhid)
+				BEGIN
+					PRINT N'Không tồn tại chi nhánh'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			SELECT M.*, CN.TenChiNhanh
+			FROM Mon M JOIN ChiNhanh CN ON CN.ThucDonID = M.ThucDonID
+			WHERE CN.ChiNhanhID = @chinhanhid
+
+		END TRY
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--Conversion deadlock
+--Mô tả: Đối tác và khách hàng cùng xem tình trạng đơn hàng giữ khóa đọc,
+--cả hai cần ghi trên đơn hàng nhưng không ghi được do không xin được khóa ghi, xảy ra deadlock
+--T1: Đối tác nhận đơn hàng
+--T2: khách hàng hủy đơn hàng
+--T1:
+CREATE
+--ALTER
+PROC doitac_NhanDonHang
+	@donhangid int
+AS
+	BEGIN TRAN
+	SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM DonHang WHERE DonHangID = @donhangid)
+				BEGIN
+					PRINT N'Không tồn tại đơn hàng'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+
+			DECLARE @trangthai nvarchar(20)
+			SET @trangthai = (SELECT TrangThai FROM DonHang WHERE DonHangID = @donhangid)
+
+			WAITFOR DELAY '00:00:10'
+
+			IF @trangthai = N'Chờ nhận'
+				BEGIN
+					SET @trangthai = N'Đang chuẩn bị'
+					UPDATE DonHang
+					SET TrangThai = @trangthai
+					WHERE DonHangID = @donhangid
+				END
+			ELSE
+				BEGIN
+					PRINT N'Không thể nhận đơn hàng'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+		END TRY
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--T2:
+CREATE 
+--ALTER
+PROC usr_HuyDonHang
+	@donhangid int
+AS
+	BEGIN TRAN
+	SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM DonHang WHERE DonHangID = @donhangid)
+					BEGIN
+						PRINT N'Không tồn tại đơn hàng'
+						ROLLBACK TRAN
+						RETURN 0
+					END
+
+			DECLARE @trangthai nvarchar(20)
+			SET @trangthai = (SELECT TrangThai FROM DonHang WHERE DonHangID = @donhangid)
+
+
+			IF @trangthai = N'Chờ nhận'
+				BEGIN
+					SET @trangthai = N'Đã hủy'
+					UPDATE DonHang
+					SET TrangThai = @trangthai
+					WHERE DonHangID = @donhangid
+				END
+			ELSE
+				BEGIN
+					PRINT N'Không thể hủy đơn hàng'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+		END TRY
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--Fix T1
+CREATE
+--ALTER
+PROC doitac_NhanDonHang_Fix
+	@donhangid int
+AS
+	BEGIN TRAN
+	SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM DonHang WHERE DonHangID = @donhangid)
+				BEGIN
+					PRINT N'Không tồn tại đơn hàng'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+
+			DECLARE @trangthai nvarchar(20)
+			SET @trangthai = (SELECT TrangThai FROM DonHang with (XLOCK, HOLDLOCK) WHERE DonHangID = @donhangid)
+
+			WAITFOR DELAY '00:00:10'
+
+			IF @trangthai = N'Chờ nhận'
+				BEGIN
+					SET @trangthai = N'Đang chuẩn bị'
+					UPDATE DonHang
+					SET TrangThai = @trangthai
+					WHERE DonHangID = @donhangid
+				END
+			ELSE
+				BEGIN
+					PRINT N'Không thể nhận đơn hàng'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+		END TRY
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--Cycle Deadlock
+--Mô tả: Đối tác nhận đơn hàng và update hết món, giữ X lock trên đơn hàng và yêu cầu X lock trên món
+--Khách hàng xem còn món và đặt hàng, giữ S lock trên món và yêu cầu X lock trên đơn hàng, xảy ra deadlock
+--T1: Đối tác nhận đơn hàng và update món
+--T2: Khách hàng xem món và đặt đơn hàng
+--T1:
+CREATE 
+--ALTER
+PROC doitac_NhanDonHangVaCapNhatMon
+	@donhangid int
+AS
+	BEGIN TRAN
+	SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM DonHang WHERE DonHangID = @donhangid)
+				BEGIN
+					PRINT N'Không tồn tại đơn hàng'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+
+			DECLARE @trangthai nvarchar(20)
+			SET @trangthai = (SELECT TrangThai FROM DonHang WHERE DonHangID = @donhangid)
+
+			IF @trangthai = N'Chờ nhận'
+				BEGIN
+					SET @trangthai = N'Đang chuẩn bị'
+					UPDATE DonHang
+					SET TrangThai = @trangthai
+					WHERE DonHangID = @donhangid
+				END
+			ELSE
+				BEGIN
+					PRINT N'Không thể nhận đơn hàng'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+
+			DECLARE @monid char(50)
+			SET @monid = (SELECT MonID FROM ChiTietDonHang WHERE DonHangID = @donhangid)
+
+			WAITFOR DELAY '00:00:10'
+
+			UPDATE Mon
+			SET TinhTrang = N'Hết'
+			WHERE MonID = @monid
+		END TRY
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--T2:
+CREATE
+--ALTER
+PROC usr_XemTinhTrangMonVaDatHang
+	@monid char(50),
+	@nguoinhan nvarchar(50),
+	@sdt char(10),
+	@diachi ntext,
+	@ngaydat date,
+	@phi int,
+	@ship int,
+	@trangthai nvarchar(20),
+	@khachhangid char(50),
+	@soluong int,
+	@gia int,
+	@ghichu ntext,
+	@danhgia nvarchar(20)
+AS
+	BEGIN TRAN
+	SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM Mon WHERE MonID = @monid)
+				BEGIN
+					PRINT N'Không tồn tại món ăn'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+			DECLARE @tinhtrang nvarchar(20)
+			SET @tinhtrang = (SELECT TinhTrang FROM Mon WHERE MonID = @monid)
+
+			IF @tinhtrang != 'Còn'
+				BEGIN
+					PRINT N'Món ăn hết. Không thể đặt'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+
+			INSERT INTO DonHang(NguoiNhan, SoDienThoai, DiaChiNhanHang, NgayDatHang, PhiSanPham, PhiVanChuyen, TrangThai, KhachHangID, TaiXeID)
+			VALUES (@nguoinhan, @sdt, @diachi, @ngaydat, @phi, @ship, @trangthai, @khachhangid, NULL)
+
+			DECLARE @donhangid int
+			SET @donhangid = (SELECT DonHangID FROM DonHang WHERE NguoiNhan = @nguoinhan AND SoDienThoai = @sdt AND  KhachHangID = @khachhangid)
+			INSERT INTO ChiTietDonHang
+			VALUES (@monid, @donhangid, @soluong, @gia, @ghichu, @danhgia)
+		END TRY
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO
+
+--Fix T1:
+CREATE 
+--ALTER
+PROC doitac_NhanDonHangVaCapNhatMon_Fix
+	@donhangid int
+AS
+	BEGIN TRAN
+	SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
+		BEGIN TRY
+			IF NOT EXISTS (SELECT * FROM DonHang WHERE DonHangID = @donhangid)
+				BEGIN
+					PRINT N'Không tồn tại đơn hàng'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+
+			DECLARE @trangthai nvarchar(20)
+			SET @trangthai = (SELECT TrangThai FROM DonHang WHERE DonHangID = @donhangid)
+
+			IF @trangthai = N'Chờ nhận'
+				BEGIN
+					SET @trangthai = N'Đang chuẩn bị'
+					UPDATE DonHang
+					SET TrangThai = @trangthai
+					WHERE DonHangID = @donhangid
+				END
+			ELSE
+				BEGIN
+					PRINT N'Không thể nhận đơn hàng'
+					ROLLBACK TRAN
+					RETURN 0
+				END
+
+			DECLARE @monid char(50)
+			SET @monid = (SELECT MonID FROM ChiTietDonHang WHERE DonHangID = @donhangid)
+			
+			DECLARE @tinhtrang nvarchar(20)
+			SET @tinhtrang = (SELECT TinhTrang FROM Mon WITH (TABLOCKX, HOLDLOCK) WHERE MonID = @monid)
+
+			WAITFOR DELAY '00:00:10'
+
+			SET @tinhtrang = N'Hết'
+			UPDATE Mon
+			SET TinhTrang = @tinhtrang
+			WHERE MonID = @monid
+		END TRY
+		BEGIN CATCH
+			PRINT N'Hệ thống xảy ra lỗi, hãy thử lại!'
+			ROLLBACK TRAN
+			RETURN 0
+		END CATCH
+	COMMIT TRAN
+	RETURN 1
+GO

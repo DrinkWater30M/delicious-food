@@ -537,6 +537,7 @@ values
 ('abc','0987654321',N'123 nguyễn văn cừ quận 5 hcm','20221022',10000,15000,N'Đang Giao','kh09','tx09'),
 ('abc','0987654321',N'123 nguyễn văn cừ quận 5 hcm','20221022',10000,15000,N'Đang Giao','kh10','tx10'),
 ('bac','0123456789',N'123 nguyễn văn cừ quận 5 hcm','20221022',20000,15000,N'Đã Nhận','kh10','tx10'),
+('bac','0123456789',N'123 nguyễn văn cừ quận 5 hcm','20221022',20000,15000,N'Chờ nhận','kh10',NULL),
 
 insert into ChiTietDonHang
 values('mon01',1 ,3,10000,'abc','5 sao'),
@@ -549,6 +550,8 @@ values('mon01',1 ,3,10000,'abc','5 sao'),
 ('mon08',8,3,10000,'abc','5 sao'),
 ('mon09',9,3,10000,'abc','5 sao'),
 ('mon10',10,3,10000,'abc','5 sao')
+('mon10',12,3,10000,'abc','5 sao')
+
 
 --test
 select * from ChiNhanh
