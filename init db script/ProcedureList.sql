@@ -1,4 +1,5 @@
-﻿--Cập nhật giỏ hàng
+﻿--Procedure và Transaction(Có tranh chấp và fix tranh chấp)
+--Cập nhật giỏ hàng
 use ESHOPPING
 go
 
