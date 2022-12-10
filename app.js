@@ -31,7 +31,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  store: new SQLiteStore({ db: 'sessions.db', dir: './models' })
+  store: new SQLiteStore({ db: 'session.db', dir: './models' })
 }));
 app.use(passport.authenticate('session'));
 
